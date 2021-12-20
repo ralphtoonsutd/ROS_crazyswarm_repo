@@ -61,11 +61,11 @@ if __name__ == "__main__":
 
     #swarm, timeHelper = initSwarm()
 
-    swarm = Crazyswarm()
+    swarm = Crazyswarm(crazyflies_yaml="crazyflies.yaml")
     timeHelper = swarm.timeHelper
     allcfs = swarm.allcfs
 
-    allcfs.takeoff(targetHeight=0.4, duration=2)
+    allcfs.crazyflies[0].takeoff(targetHeight=0.4, duration=2)
     timeHelper.sleep(2.5)
 
     #allcfs.goTo([1, 0, 0.7], 2, 1.5)
@@ -80,5 +80,5 @@ if __name__ == "__main__":
 
     input("\nPress any key to land...")
 
-    allcfs.land(targetHeight=0.04, duration=2.5)
+    allcfs.crazyflies[0].land(targetHeight=0.04, duration=2.5)
     timeHelper.sleep(3)
