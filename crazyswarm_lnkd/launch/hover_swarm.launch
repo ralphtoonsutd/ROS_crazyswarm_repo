@@ -2,8 +2,8 @@
 <launch>
   <arg name="joy_dev" default="/dev/input/js0" />
 
-  <rosparam command="load" file="$(find crazyswarm)/launch/crazyflieTypes.yaml" />
-  <rosparam command="load" file="$(find crazyswarm)/launch/crazyflies.yaml" />
+  <rosparam command="load" file="$(find crazyswarm_lnkd)/launch/crazyflieTypes.yaml" />
+  <rosparam command="load" file="$(find crazyswarm_lnkd)/launch/crazyflies.yaml" />
 
   <node pkg="crazyswarm" type="crazyswarm_server" name="crazyswarm_server" output="screen" >
     <rosparam>
@@ -44,10 +44,6 @@
       enable_logging: True
       enable_logging_pose: True
     </rosparam>
-  </node>
-
-  <node name="joy" pkg="joy" type="joy_node" output="screen">
-    <param name="dev" value="$(arg joy_dev)" />
   </node>
 
   <node pkg="crazyswarm" type="crazyswarm_teleop" name="crazyswarm_teleop" output="screen">
