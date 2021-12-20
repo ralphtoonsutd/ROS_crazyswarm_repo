@@ -66,10 +66,10 @@ if __name__ == "__main__":
     allcfs = swarm.allcfs
 
     allcfs.takeoff(targetHeight=0.4, duration=2)
-    timeHelper.sleep(2)
+    timeHelper.sleep(2.5)
 
-    allcfs.goTo([1, 0, 0.7], 2, 1.5)
-    timeHelper.sleep(1.5)
+    #allcfs.goTo([1, 0, 0.7], 2, 1.5)
+    #timeHelper.sleep(1.5)
 
     #rospy.Subscriber('instructions', Pose, moveCallback, swarm)
 
@@ -81,4 +81,4 @@ if __name__ == "__main__":
     input("\nPress any key to land...")
 
     allcfs.land(targetHeight=0.04, duration=2.5)
-    timeHelper.sleep(2.5)
+    timeHelper.sleep(3)
