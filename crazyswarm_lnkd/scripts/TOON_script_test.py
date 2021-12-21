@@ -1,12 +1,17 @@
 #!/usr/bin/env python
 
+#Python
 import csv
-
 import rospy
+
+#ROS
 from geometry_msgs.msg import *
+from std_msgs.msg import String
+
+#Crazyswarm
 from pycrazyswarm import *
 from pycrazyswarm.crazyflie import TimeHelper
-from std_msgs.msg import String
+
 
 """
 class SwarmHandler:
@@ -41,14 +46,13 @@ class SwarmHandler:
         pass
 """
 
-"""
 def initSwarm():
     print("CF swarm starting...")
     swarm = Crazyswarm()
     timeHelper = swarm.timeHelper
 
     return swarm, timeHelper
-"""
+
 
 '''
 def moveCallback(data, swarm):
@@ -59,17 +63,14 @@ def moveCallback(data, swarm):
 
 if __name__ == "__main__":
 
-    #swarm, timeHelper = initSwarm()
-
-    swarm = Crazyswarm()
-    timeHelper = swarm.timeHelper
+    swarm, timeHelper = initSwarm()
     allcfs = swarm.allcfs
 
     allcfs.takeoff(targetHeight=0.4, duration=2)
     timeHelper.sleep(2.5)
 
-    #allcfs.goTo([1, 0, 0.7], 2, 1.5)
-    #timeHelper.sleep(1.5)
+    allcfs.goTo([0, 0, 0.4], 2, 1.5)
+    timeHelper.sleep(2)
 
     #rospy.Subscriber('instructions', Pose, moveCallback, swarm)
 

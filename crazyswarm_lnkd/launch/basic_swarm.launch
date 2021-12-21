@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <launch>
-  <arg name="joy_dev" default="/dev/input/js0" />
+  <!-- <arg name="joy_dev" default="/dev/input/js0" /> -->
 
   <rosparam command="load" file="$(find crazyswarm_lnkd)/launch/crazyflieTypes.yaml" />
   <rosparam command="load" file="$(find crazyswarm_lnkd)/launch/crazyflies.yaml" />
