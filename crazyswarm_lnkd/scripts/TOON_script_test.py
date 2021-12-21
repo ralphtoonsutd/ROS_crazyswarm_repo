@@ -3,6 +3,7 @@
 #Python
 import csv
 import rospy
+import rospkg
 
 #ROS
 from geometry_msgs.msg import *
@@ -48,7 +49,9 @@ class SwarmHandler:
 
 def initSwarm():
     print("CF swarm starting...")
-    swarm = Crazyswarm()
+    rospack = rospkg.RosPack()
+    launchPath = rospack.get_path('crazyswarm_lnkd')+"/launch/crazyflies.yaml"
+    swarm = Crazyswarm(crazyflies_yaml=launchPath)
     timeHelper = swarm.timeHelper
 
     return swarm, timeHelper
