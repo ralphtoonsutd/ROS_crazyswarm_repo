@@ -61,7 +61,7 @@ if __name__ == "__main__":
 
     #swarm, timeHelper = initSwarm()
 
-    swarm = Crazyswarm(crazyflies_yaml="~/crazyswarm/ros_ws/src/crazyswarm/launch/crazyflies.yaml")
+    swarm = Crazyswarm()
     timeHelper = swarm.timeHelper
     allcfs = swarm.allcfs
 
