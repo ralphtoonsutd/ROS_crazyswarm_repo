@@ -33,6 +33,7 @@ if __name__ == "__main__":
     allcfs.takeoff(targetHeight=0.4, duration=2)
     timeHelper.sleep(2.5)
 
+    '''
     allcfs.crazyflies[0].goTo([0, 0, 0.6], 0, 2)
     timeHelper.sleep(2.5)
 
@@ -42,6 +43,7 @@ if __name__ == "__main__":
 
     allcfs.goTo([-0.5, -0.5, 0.6], 0, 2)
     timeHelper.sleep(2.5)
+    '''
 
     input("\nPress any key to land...")
 
