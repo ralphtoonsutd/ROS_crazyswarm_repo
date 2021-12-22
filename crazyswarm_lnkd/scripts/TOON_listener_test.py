@@ -1,14 +1,21 @@
 #!/usr/bin/env python
+from pycrazyswarm import crazyswarm_py
+from pycrazyswarm.crazyswarm_py import Crazyswarm
 import rospy
 import numpy as np
 from std_msgs.msg import *  # Bit wasteful lmao
 from geometry_msgs.msg import *
+from crazyswarm.msg import GenericLogData
 
 
 def callback(data):
     rospy.loginfo("%f", data.position.x)
     rospy.loginfo("%f", data.position.y)
     rospy.loginfo("%f", data.position.z)
+
+
+def batteryCallBack(data, cfNum):
+    rospy.loginfo("%f: I heard %f", cfNum, data.values[0])
 
 
 def listener():
@@ -22,7 +29,11 @@ def listener():
 
     #rospy.Subscriber("/cf231/pose/", PoseStamped, callback, queue_size=10)
 
-    rospy.Subscriber('instructions', Pose, callback, queue_size=10)
+    rospy.Subscriber('/cf1/log1/', GenericLogData,
+                     batteryCallBack, callback_args=1, queue_size=10)
+
+    rospy.Subscriber('/cf2/log1/', GenericLogData,
+                     batteryCallBack, callback_args=2, queue_size=10)
 
     # spin() simply keeps python from exiting until this node is stopped
     rospy.spin()

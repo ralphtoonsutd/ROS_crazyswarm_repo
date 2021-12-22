@@ -1,15 +1,15 @@
 #!/usr/bin/env python
 
-#Python
+# Python
 import csv
 import rospy
 import rospkg
 
-#ROS
+# ROS
 from geometry_msgs.msg import *
 from std_msgs.msg import String
 
-#Crazyswarm
+# Crazyswarm
 from pycrazyswarm import *
 from pycrazyswarm.crazyflie import TimeHelper
 
@@ -47,6 +47,7 @@ class SwarmHandler:
         pass
 """
 
+
 def initSwarm():
     print("CF swarm starting...")
     rospack = rospkg.RosPack()
@@ -57,12 +58,16 @@ def initSwarm():
     return swarm, timeHelper
 
 
-'''
 def moveCallback(data, swarm):
+    # Test print to ensure correct co-ords are being sent
     rospy.loginfo(rospy.get_caller_id() + "I heard %f", data.position.x)
-    swarm.allcfs.crazyflies[0].goTo(
+    swarm.allcfs.goTo(
         [data.position.x, data.position.y, data.position.z], 0, 2.0)
-'''
+
+
+def batteryCallBack(data, ):
+    rospy.loginfo(rospy.get_caller_id() + "I heard %f", data)
+
 
 if __name__ == "__main__":
 
@@ -72,10 +77,7 @@ if __name__ == "__main__":
     allcfs.takeoff(targetHeight=0.4, duration=2)
     timeHelper.sleep(2.5)
 
-    allcfs.goTo([0, 0, 0.4], 2, 1.5)
-    timeHelper.sleep(2)
-
-    #rospy.Subscriber('instructions', Pose, moveCallback, swarm)
+    rospy.Subscriber('instructions', Pose, moveCallback, swarm)
 
     print("Swarm ready for commands")
     print("Note: Run cf_get_bs_geometry.py if CF flight area bounds are incorrectly configured")

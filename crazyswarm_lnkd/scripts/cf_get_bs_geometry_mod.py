@@ -48,6 +48,9 @@ import logging
 import csv
 import numpy as np
 from threading import Event
+import rospkg
+from pycrazyswarm import *
+import yaml
 
 import cflib.crtp
 from cflib.crazyflie import Crazyflie
@@ -73,10 +76,12 @@ class Estimator:
             print("Write to CF failed!")
         self.write_event.set()
 
-    def estimate(self, uri, do_write):
+    def estimate(self, ids, do_write):
         cf = Crazyflie(rw_cache='./cache')
         geoStore = []
-        with SyncCrazyflie(uri, cf=cf) as scf:
+        geometries = {}
+        with SyncCrazyflie(self.buildURI(ids[0]), cf=cf) as scf:
+            print("Using crazyflie " + ids[0] + " as origin")
             print("Reading sensor data...")
             sweep_angle_reader = LighthouseSweepAngleAverageReader(
                 scf.cf, self.angles_collected_cb)
@@ -84,7 +89,6 @@ class Estimator:
             self.collection_event.wait()
 
             print("Estimating position of base stations...")
-            geometries = {}
             estimator = LighthouseBsGeoEstimator()
 
             for id in sorted(self.sensor_vectors_all.keys()):
@@ -111,11 +115,13 @@ class Estimator:
 
                 print()
 
-            if do_write:
-                print("Uploading geo data to CF")
-                helper = LighthouseMemHelper(scf.cf)
-                helper.write_geos(geometries, self.write_done_cb)
-                self.write_event.wait()
+        if do_write:
+            for id in ids:
+                with SyncCrazyflie(self.buildURI(ids[id]), cf=cf) as scf:
+                    print("Uploading geo data to CF " + id)
+                    helper = LighthouseMemHelper(scf.cf)
+                    helper.write_geos(geometries, self.write_done_cb)
+                    self.write_event.wait()
 
         return geoStore
 
@@ -151,37 +157,57 @@ class Estimator:
         print(']')
         print('geo.valid =', is_valid)
 
-
-parser = argparse.ArgumentParser()
-uri = "radio://0/80/2M"
-parser.add_argument(
-    "--uri", help="uri to use when connecting to the Crazyflie. Default: " + uri)
-parser.add_argument(
-    "--write", help="upload the calculated geo data to the Crazyflie", action="store_true")
-args = parser.parse_args()
-if args.uri:
-    uri = args.uri
-
-# Only output errors from the logging framework
-logging.basicConfig(level=logging.ERROR)
-cflib.crtp.init_drivers(enable_debug_driver=False)
-
-estimator = Estimator()
-geoStore = estimator.estimate(uri, args.write)
-
-# Assumes the use of 2 base stations
-print("Creating bs_geometry.csv...")
-with open('bs_geometry.csv', 'w+', newline='') as csvfile:
-    newdata = csv.writer(csvfile, delimiter=' ', quoting=csv.QUOTE_MINIMAL)
-    newdata.writerow([geoStore[0][0]]+[geoStore[0][1]] +
-                     [geoStore[0][2]])  # lighthouse 1
-    newdata.writerow([geoStore[1][0]]+[geoStore[1][1]] +
-                     [geoStore[1][2]])  # lighthouse 2
+    def buildURI(id):
+        # This method has no checks and only works for ids less than 10 cause ceebs
+        baseURI = 'radio://0/80/2M/E7E7E7E7'
+        uri = baseURI + '0' + str(id)
+        return uri
 
 
-with open('bs_geometry.csv', 'r', newline='') as csvfile:
-    csvfile = csv.reader(csvfile, delimiter=' ', quotechar='|')
-    for row in csvfile:
-        print(row[0], row[1], row[2])
+def writeToCSV(geoStore):
+    # Assumes the use of 2 base stations
+    print("Creating bs_geometry.csv...")
+    with open('bs_geometry.csv', 'w+', newline='') as csvfile:
+        newdata = csv.writer(csvfile, delimiter=' ', quoting=csv.QUOTE_MINIMAL)
+        newdata.writerow([geoStore[0][0]]+[geoStore[0][1]] +
+                         [geoStore[0][2]])  # lighthouse 1
+        newdata.writerow([geoStore[1][0]]+[geoStore[1][1]] +
+                         [geoStore[1][2]])  # lighthouse 2
 
-print("Base station geometry estimation complete!")
+    with open('bs_geometry.csv', 'r', newline='') as csvfile:
+        csvfile = csv.reader(csvfile, delimiter=' ', quotechar='|')
+        for row in csvfile:
+            print(row[0], row[1], row[2])
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--write", help="upload the calculated geo data to the Crazyflie", action="store_true")
+    parser.add_argument(
+        "--csv", help="write calculated geo data to .csv file", action="store_true")
+
+    args = parser.parse_args()
+
+    # Only output errors from the logging framework
+    logging.basicConfig(level=logging.ERROR)
+    cflib.crtp.init_drivers(enable_debug_driver=False)
+
+    # Load ids from crazyflies.yaml to build URIs for writing
+    rospack = rospkg.RosPack()
+    yamlPath = rospack.get_path('crazyswarm_lnkd')+"/launch/crazyflies.yaml"
+
+    with open(yamlPath, 'r') as ymlfile:
+        cfg = yaml.load(ymlfile)
+
+    ids = []
+    for crazyflie in cfg["crazyflies"]:
+        ids.append(int(crazyflie["id"]))
+
+    estimator = Estimator()
+    geoStore = estimator.estimate(ids, args.write)
+
+    if args.csv:
+        writeToCSV(geoStore)
+
+    print("Base station geometry estimation complete!")
