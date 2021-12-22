@@ -119,6 +119,7 @@ class Estimator:
         if do_write:
             for id in ids:
                 with SyncCrazyflie(self.buildURI(id), cf=cf) as scf:
+                    self.write_event.clear()
                     print("Uploading geo data to CF " + str(id))
                     helper = LighthouseMemHelper(scf.cf)
                     helper.write_geos(geometries, self.write_done_cb)
