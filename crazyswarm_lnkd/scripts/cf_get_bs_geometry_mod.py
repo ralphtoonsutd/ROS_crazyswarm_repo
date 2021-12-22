@@ -80,8 +80,9 @@ class Estimator:
         cf = Crazyflie(rw_cache='./cache')
         geoStore = []
         geometries = {}
+        print(ids)
         with SyncCrazyflie(self.buildURI(ids[0]), cf=cf) as scf:
-            print("Using crazyflie " + ids[0] + " as origin")
+            print("Using crazyflie " + str(ids[0]) + " as origin")
             print("Reading sensor data...")
             sweep_angle_reader = LighthouseSweepAngleAverageReader(
                 scf.cf, self.angles_collected_cb)
@@ -117,8 +118,8 @@ class Estimator:
 
         if do_write:
             for id in ids:
-                with SyncCrazyflie(self.buildURI(ids[id]), cf=cf) as scf:
-                    print("Uploading geo data to CF " + id)
+                with SyncCrazyflie(self.buildURI(ids[id-1]), cf=cf) as scf:
+                    print("Uploading geo data to CF " + str(id))
                     helper = LighthouseMemHelper(scf.cf)
                     helper.write_geos(geometries, self.write_done_cb)
                     self.write_event.wait()
@@ -157,7 +158,7 @@ class Estimator:
         print(']')
         print('geo.valid =', is_valid)
 
-    def buildURI(id):
+    def buildURI(self, id):
         # This method has no checks and only works for ids less than 10 cause ceebs
         baseURI = 'radio://0/80/2M/E7E7E7E7'
         uri = baseURI + '0' + str(id)
