@@ -2,6 +2,7 @@
 
 # Python
 import csv
+from time import time
 import rospy
 import rospkg
 
@@ -32,12 +33,15 @@ if __name__ == "__main__":
     allcfs.takeoff(targetHeight=0.4, duration=2)
     timeHelper.sleep(2.5)
 
-    rospy.Subscriber('instructions', Pose, moveCallback, swarm)
+    allcfs.crazyflies[0].goTo([0, 0, 0.6], 0, 2)
+    timeHelper.sleep(2.5)
 
-    print("Swarm ready for commands")
-    print("Note: Run cf_get_bs_geometry.py if CF flight area bounds are incorrectly configured")
+    allcfs.crazyflies[0].goTo([0.5, 0.5, 0.6], 0, 2)
+    allcfs.crazyflies[1].goTo([0, 0, 0.6], 0, 2)
+    timeHelper.sleep(2.5)
 
-    # Program loop
+    allcfs.goTo([-0.5, -0.5, 0.6], 0, 2)
+    timeHelper.sleep(2.5)
 
     input("\nPress any key to land...")
 
