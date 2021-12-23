@@ -42,8 +42,8 @@ if __name__ == "__main__":
             for point in circleIsh:
                 for cf in allcfs.crazyflies:
                     pos = np.array(cf.initialPosition) + np.array(point)
-                    cf.goTo(pos, 0, 2.0)
-                timeHelper.sleep(1.8)
+                    cf.goTo(pos, 0, 1)
+                timeHelper.sleep(0.5)
     except KeyboardInterrupt:
         pass
 
