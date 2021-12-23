@@ -1,18 +1,15 @@
 #!/usr/bin/env python
 
 # Python
-import csv
+import numpy as np
 from time import time
-import rospy
 import rospkg
-
-# ROS
-from geometry_msgs.msg import *
-from std_msgs.msg import String
 
 # Crazyswarm
 from pycrazyswarm import *
-from pycrazyswarm.crazyflie import TimeHelper
+
+circleIsh = [[0.0, 0.5, 0.0], [0.35, 0.357, 0.0], [0.5, 0.0, 0.0], [0.35, -0.357, 0.0],
+             [0.0, -0.5, 0.0], [-0.35, -0.357, 0.0], [-0.5, 0.0, 0.0], [-0.35, 0.357, 0.0]]
 
 
 def initSwarm():
@@ -33,17 +30,22 @@ if __name__ == "__main__":
     allcfs.takeoff(targetHeight=0.4, duration=2)
     timeHelper.sleep(2.5)
 
-    
-    allcfs.crazyflies[0].goTo([0, 0, 0.6], 0, 2)
+    # Wherever the CFs take off from, move them into their correct default positions
+    for cf in allcfs.crazyflies:
+        pos = np.array(cf.initialPosition) + np.array([0, 0, 0.5])
+        cf.goTo(pos, 0, 2.0)
     timeHelper.sleep(2.5)
 
-    allcfs.crazyflies[0].goTo([0.5, 0.5, 0.6], 0, 2)
-    allcfs.crazyflies[1].goTo([0, 0, 0.6], 0, 2)
-    timeHelper.sleep(2.5)
-
-    allcfs.goTo([-0.5, -0.5, 0.3], 0, 2)
-    timeHelper.sleep(2.5)
-    
+    # Do the circle movement and break on ctrl+C
+    try:
+        while True:
+            for point in circleIsh:
+                for cf in allcfs.crazyflies:
+                    pos = np.array(cf.initialPosition) + np.array(point)
+                    cf.goTo(pos, 0, 2.0)
+                timeHelper.sleep(2.5)
+    except KeyboardInterrupt:
+        pass
 
     input("\nPress any key to land...")
 
