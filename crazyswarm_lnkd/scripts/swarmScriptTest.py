@@ -8,8 +8,11 @@ import rospkg
 # Crazyswarm
 from pycrazyswarm import *
 
-circleIsh = [[0.0, 0.5, 0.5], [0.35, 0.357, 0.5], [0.5, 0.0, 0.5], [0.35, -0.357, 0.5],
-             [0.0, -0.5, 0.5], [-0.35, -0.357, 0.5], [-0.5, 0.0, 0.5], [-0.35, 0.357, 0.5]]
+circleIsh = [[0.0, 0.5, 0.6], [0.35, 0.357, 0.6], [0.5, 0.0, 0.6], [0.35, -0.357, 0.6],
+             [0.0, -0.5, 0.6], [-0.35, -0.357, 0.6], [-0.5, 0.0, 0.6], [-0.35, 0.357, 0.6]]
+
+verticalCircleIsh = [[0.5, 0.0, 0.6], [0.29, 0.0, 0.42], [0.0, 0.0, 0.38], [-0.29, 0.0, 0.42],
+                     [-0.5, 0.0, 0.6], [-0.29, 0.0, 0.78], [0.0, 0.0, 0.82], [0.29, 0.0, 0.78]]
 
 
 def initSwarm():
@@ -39,10 +42,9 @@ if __name__ == "__main__":
     # Do the circle movement and break on ctrl+C
     try:
         while True:
-            for point in circleIsh:
-                for cf in allcfs.crazyflies:
-                    pos = np.array(cf.initialPosition) + np.array(point)
-                    cf.goTo(pos, 0, 1)
+            for count in range(0, 8, 1):
+                allcfs.crazyflies[0].goTo(circleIsh[count], 0, 1)
+                allcfs.crazyflies[1].goTo(verticalCircleIsh[count], 0, 1)
                 timeHelper.sleep(0.5)
     except KeyboardInterrupt:
         pass
