@@ -40,7 +40,9 @@
 #  4. Copy/paste the output into lighthouse.c, recompile and flash the Crazyflie.
 #
 #  EDIT:
-#  Script will now output base station positions ONLY to CSV in current directorys
+#  Script will now output base station positions ONLY to CSV in current directories
+#  Script can handle multiple CFs and pulls URIs from crazyflies.yaml
+#
 
 
 import argparse
@@ -76,13 +78,15 @@ class Estimator:
             print("Write to CF failed!")
         self.write_event.set()
 
-    def estimate(self, ids, do_write):
+    def estimate(self, ids, do_write, invert):
         cf = Crazyflie(rw_cache='./cache')
         geoStore = []
         geometries = {}
-        print(ids)
+        print('CFs in swarm: ' + ids)
+
         with SyncCrazyflie(self.buildURI(ids[0]), cf=cf) as scf:
             print("Using crazyflie " + str(ids[0]) + " as origin")
+
             print("Reading sensor data...")
             sweep_angle_reader = LighthouseSweepAngleAverageReader(
                 scf.cf, self.angles_collected_cb)
@@ -98,15 +102,19 @@ class Estimator:
                 rotation_bs_matrix, position_bs_vector = estimator.estimate_geometry(
                     sensor_data)
                 is_valid = estimator.sanity_check_result(position_bs_vector)
+
                 if is_valid:
                     geo = LighthouseBsGeometry()
                     geo.rotation_matrix = rotation_bs_matrix
                     geo.origin = position_bs_vector
                     geo.valid = True
 
+                    if invert:
+                        self.invertBSCoord(geo)
+
                     geometries[id] = geo
 
-                    self.print_geo(rotation_bs_matrix,
+                    self.print_geo(id, rotation_bs_matrix,
                                    position_bs_vector, is_valid)
 
                     geoStore.append(position_bs_vector)
@@ -127,7 +135,8 @@ class Estimator:
 
         return geoStore
 
-    def print_geo(self, rotation_cf, position_cf, is_valid):
+    def print_geo(self, bsid, rotation_cf, position_cf, is_valid):
+        print('Base station ' + bsid + ' geometry:')
         print('C-format')
         if is_valid:
             valid_c = 'true'
@@ -165,6 +174,28 @@ class Estimator:
         uri = baseURI + '0' + str(id)
         return uri
 
+    def invertBSCoord(self, geo: LighthouseBsGeometry) -> LighthouseBsGeometry:
+        # Convert BS geo data to 4x4 numpy arrays -> TT and TR1
+        rot = np.array(geo.rotation_matrix)
+        rot.resize((4, 4))
+
+        tr = np.array(geo.origin)
+        tr.resize((4, 4))
+
+        rot[3][3], tr[3][3] = 1
+
+        print(rot)
+        print(tr)
+
+        TT = np.array()
+        # Create numpy array for x-axis rotation of 180 deg -> TR2
+
+        # Do T = TT.TR1
+
+        # Do T = TR2.T
+
+        # Extract new rotation matrix and position vector from T and return
+
 
 def writeToCSV(geoStore):
     # Assumes the use of 2 base stations
@@ -188,6 +219,8 @@ if __name__ == "__main__":
         "--write", help="upload the calculated geo data to the Crazyflie", action="store_true")
     parser.add_argument(
         "--csv", help="write calculated geo data to .csv file", action="store_true")
+    parser.add_argument(
+        "--invert", help="use when LH deck is mounted under CF. Rotates base station co-ordinate systems around x-axis", action="store_true")
 
     args = parser.parse_args()
 
@@ -206,8 +239,9 @@ if __name__ == "__main__":
     for crazyflie in cfg["crazyflies"]:
         ids.append(int(crazyflie["id"]))
 
+    # Estimate the lighthouse positions
     estimator = Estimator()
-    geoStore = estimator.estimate(ids, args.write)
+    geoStore = estimator.estimate(ids, args.write, args.invert)
 
     if args.csv:
         writeToCSV(geoStore)
