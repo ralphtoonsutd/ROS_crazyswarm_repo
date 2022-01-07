@@ -82,7 +82,7 @@ class Estimator:
         cf = Crazyflie(rw_cache='./cache')
         geoStore = []
         geometries = {}
-        print('CFs in swarm: ' + ids)
+        print(ids)
 
         with SyncCrazyflie(self.buildURI(ids[0]), cf=cf) as scf:
             print("Using crazyflie " + str(ids[0]) + " as origin")
@@ -136,7 +136,7 @@ class Estimator:
         return geoStore
 
     def print_geo(self, bsid, rotation_cf, position_cf, is_valid):
-        print('Base station ' + bsid + ' geometry:')
+        #print('Base station ' + bsid + ' geometry:')
         print('C-format')
         if is_valid:
             valid_c = 'true'
@@ -182,12 +182,13 @@ class Estimator:
         tr = np.array(geo.origin)
         tr.resize((4, 4))
 
-        rot[3][3], tr[3][3] = 1
+        rot[3][3] = 1
+        tr[3][3] = 1
 
         print(rot)
         print(tr)
 
-        TT = np.array()
+        #TT = np.array()
         # Create numpy array for x-axis rotation of 180 deg -> TR2
 
         # Do T = TT.TR1
