@@ -176,6 +176,22 @@ class Estimator:
 
     def invertBSCoord(self, geo: LighthouseBsGeometry) -> LighthouseBsGeometry:
         # Convert BS geo data to 4x4 numpy arrays -> TT and TR1
+
+        rot = np.zeros((4, 4))
+        tr = np.zeros((4, 4))
+
+        rot[3][3] = 1
+        tr[3][3] = 1
+
+        for row in range(0, 3, 1):
+            tr[row][3] = geo.origin[row]
+
+            for element in range(0, 3, 1):
+                rot[row][element] = geo.rotation_matrix[row][element]
+
+                if element == row:
+                    tr[row][element] = 1
+
         rot = np.array(geo.rotation_matrix)
         rot.resize((4, 4))
 
