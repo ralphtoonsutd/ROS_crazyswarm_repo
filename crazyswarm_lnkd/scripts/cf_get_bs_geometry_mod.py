@@ -176,10 +176,8 @@ class Estimator:
 
     def invertBSCoord(self, geo: LighthouseBsGeometry) -> LighthouseBsGeometry:
         # Convert BS geo data to 4x4 numpy arrays -> TT and TR1
-
         rot = np.zeros((4, 4))
         tr = np.zeros((4, 4))
-
         rot[3][3] = 1
         tr[3][3] = 1
 
@@ -192,26 +190,34 @@ class Estimator:
                 if element == row:
                     tr[row][element] = 1
 
-        rot = np.array(geo.rotation_matrix)
-        rot.resize((4, 4))
-
-        tr = np.array(geo.origin)
-        tr.resize((4, 4))
-
-        rot[3][3] = 1
-        tr[3][3] = 1
-
-        print(rot)
-        print(tr)
-
-        #TT = np.array()
         # Create numpy array for x-axis rotation of 180 deg -> TR2
+        invRot = np.array([[1, 0, 0, 0], [0, -1, 0, 0],
+                          [0, 0, -1, 0], [0, 0, 0, 1]])
 
         # Do T = TT.TR1
+        t = tr.dot(rot)
 
         # Do T = TR2.T
+        t = invRot.dot(t)
 
-        # Extract new rotation matrix and position vector from T and return
+        # Extract new rotation matrix and position vector from T, modulus z co-ord and return
+        newRot = [[], [], []]
+        newOrigin = []
+
+        for row in range(0, 3, 1):
+            newOrigin.append(t[row][3])
+            for element in range(0, 3, 1):
+                newRot[row].append(t[row][element])
+
+        newOrigin[2] = abs(newOrigin[2])
+
+        geo.rotation_matrix = newRot
+        geo.origin = newOrigin
+
+        print(newRot)
+        print(newOrigin)
+
+        return geo
 
 
 def writeToCSV(geoStore):
