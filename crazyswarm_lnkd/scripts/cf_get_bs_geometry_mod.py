@@ -110,7 +110,7 @@ class Estimator:
                     geo.valid = True
 
                     if invert:
-                        self.invertBSCoord(geo)
+                        geo = self.invertBSCoord(geo)
 
                     geometries[id] = geo
 
