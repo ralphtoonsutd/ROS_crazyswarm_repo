@@ -209,8 +209,8 @@ class Estimator:
             for element in range(0, 3, 1):
                 newRot[row].append(t[row][element])
 
-        # Fix z-axis at 5cm above the ground for inverted setups
-        newOrigin[2] = 0.05
+        # Fix z-axis at 8cm above the ground for inverted setups
+        newOrigin[2] = 0.08
 
         geo.rotation_matrix = newRot
         geo.origin = newOrigin
