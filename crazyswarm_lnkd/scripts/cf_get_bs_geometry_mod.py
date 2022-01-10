@@ -200,7 +200,7 @@ class Estimator:
         # Do T = TR2.T
         t = invRot.dot(t)
 
-        # Extract new rotation matrix and position vector from T, modulus z co-ord and return
+        # Extract new rotation matrix and position vector from T, set z co-ord and return
         newRot = [[], [], []]
         newOrigin = []
 
