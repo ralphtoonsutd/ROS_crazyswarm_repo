@@ -196,6 +196,10 @@ class Estimator:
             invRot = np.array([[1, 0, 0, 0], [0, -1, 0, 0],
                               [0, 0, -1, 0], [0, 0, 0, 1]])
         else:
+            # Do initial -42 deg rotation
+            initialRot = np.array(
+                [[0.743, 0, -0.669, 0], [0, 1, 0, 0], [0.669, 0, 0.743, 0], [0, 0, 0, 1]])
+            rot = initialRot.dot(rot)
             a = 3.14159-(2*atan(geo.origin[1]/geo.origin[0]))
             invRot = np.array([[cos(a), -sin(a), 0, 0], [sin(a), cos(a), 0, 0],
                               [0, 0, 1, 0], [0, 0, 0, 1]])
