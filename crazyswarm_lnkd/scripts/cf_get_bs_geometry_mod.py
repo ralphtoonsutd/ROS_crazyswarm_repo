@@ -196,7 +196,7 @@ class Estimator:
             invRot = np.array([[1, 0, 0, 0], [0, -1, 0, 0],
                               [0, 0, -1, 0], [0, 0, 0, 1]])
         else:
-            a = 2*atan(geo.origin[1]/geo.origin[0])
+            a = 3.14159-(2*atan(geo.origin[1]/geo.origin[0]))
             invRot = np.array([[cos(a), -sin(a), 0, 0], [sin(a), cos(a), 0, 0],
                               [0, 0, 1, 0], [0, 0, 0, 1]])
 
