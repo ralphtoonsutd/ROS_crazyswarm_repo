@@ -53,6 +53,7 @@ from threading import Event
 import rospkg
 from pycrazyswarm import *
 import yaml
+from math import atan, cos, sin
 
 import cflib.crtp
 from cflib.crazyflie import Crazyflie
@@ -109,10 +110,8 @@ class Estimator:
                     geo.origin = position_bs_vector
                     geo.valid = True
 
-                    if invert:
-                        geo = self.invertBSCoord(geo)
-                    elif invert2:
-                        geo = self.invert2BSCoord(geo)
+                    if invert or invert2:
+                        geo = self.invertBSCoord(geo, invert2)
 
                     geometries[id] = geo
 
@@ -176,7 +175,7 @@ class Estimator:
         uri = baseURI + '0' + str(id)
         return uri
 
-    def invertBSCoord(self, geo: LighthouseBsGeometry) -> LighthouseBsGeometry:
+    def invertBSCoord(self, geo: LighthouseBsGeometry, invert2: bool) -> LighthouseBsGeometry:
         # Convert BS geo data to 4x4 numpy arrays -> TT and TR1
         rot = np.zeros((4, 4))
         tr = np.zeros((4, 4))
@@ -192,9 +191,14 @@ class Estimator:
                 if element == row:
                     tr[row][element] = 1
 
-        # Create numpy array for x-axis rotation of 180 deg -> TR2
-        invRot = np.array([[1, 0, 0, 0], [0, -1, 0, 0],
-                          [0, 0, -1, 0], [0, 0, 0, 1]])
+        # Create numpy array for required rotation matrix
+        if not invert2:
+            invRot = np.array([[1, 0, 0, 0], [0, -1, 0, 0],
+                              [0, 0, -1, 0], [0, 0, 0, 1]])
+        else:
+            a = 2*atan(geo.origin[1]/geo.origin[0])
+            invRot = np.array([[cos(a), -sin(a), 0, 0], [sin(a), cos(a), 0, 0],
+                              [0, 0, 1, 0], [0, 0, 0, 1]])
 
         # Do T = TT.TR1
         t = tr.dot(rot)
@@ -212,30 +216,16 @@ class Estimator:
                 newRot[row].append(t[row][element])
 
         # Fix z-axis at 8cm above the ground for inverted setups
-        newOrigin[2] = 0.08
+        if not invert2:
+            newOrigin[2] = 0.08
+        else:
+            newOrigin[2] = 0.43
 
         geo.rotation_matrix = newRot
         geo.origin = newOrigin
 
         print(newRot)
         print(newOrigin)
-
-        return geo
-
-    def invert2BSCoord(self, geo: LighthouseBsGeometry) -> LighthouseBsGeometry:
-        # Turn rotation matrix into np.array
-        newRot = np.array(geo.rotation_matrix)
-
-        # Apply 180 deg rotation around z-axis to rotation matrix
-        invRot = np.array([[-1, 0, 0], [0, -1, 0], [0, 0, 1]])
-        newRot = invRot.dot(newRot)
-        geo.rotation_matrix = newRot
-
-        # Invert the sign of the y-coordinate in the origin
-        geo.origin[1] = geo.origin[1] * -1
-
-        # Set the z-coordinate of the origin to be 43cm (measured in real world)
-        geo.origin[2] = 0.43
 
         return geo
 
