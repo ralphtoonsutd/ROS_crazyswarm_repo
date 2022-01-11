@@ -78,7 +78,7 @@ class Estimator:
             print("Write to CF failed!")
         self.write_event.set()
 
-    def estimate(self, ids, do_write, invert):
+    def estimate(self, ids, do_write, invert, invert2):
         cf = Crazyflie(rw_cache='./cache')
         geoStore = []
         geometries = {}
@@ -111,6 +111,8 @@ class Estimator:
 
                     if invert:
                         geo = self.invertBSCoord(geo)
+                    elif invert2:
+                        geo = self.invert2BSCoord(geo)
 
                     geometries[id] = geo
 
@@ -220,6 +222,23 @@ class Estimator:
 
         return geo
 
+    def invert2BSCoord(self, geo: LighthouseBsGeometry) -> LighthouseBsGeometry:
+        # Turn rotation matrix into np.array
+        newRot = np.array(geo.rotation_matrix)
+
+        # Apply 180 deg rotation around z-axis to rotation matrix
+        invRot = np.array([[-1, 0, 0], [0, -1, 0], [0, 0, 1]])
+        newRot = invRot.dot(newRot)
+        geo.rotation_matrix = newRot
+
+        # Invert the sign of the y-coordinate in the origin
+        geo.origin[1] = geo.origin[1] * -1
+
+        # Set the z-coordinate of the origin to be 43cm (measured in real world)
+        geo.origin[2] = 0.43
+
+        return geo
+
 
 def writeToCSV(geoStore):
     # Assumes the use of 2 base stations
@@ -245,6 +264,8 @@ if __name__ == "__main__":
         "--csv", help="write calculated geo data to .csv file", action="store_true")
     parser.add_argument(
         "--invert", help="use when LH deck is mounted under CF. Rotates base station co-ordinate systems around x-axis", action="store_true")
+    parser.add_argument(
+        "--invert2", help="use when LH deck is mounted under CF. Mirrors base station co-ordinate system in the y-plane", action="store_true")
 
     args = parser.parse_args()
 
@@ -265,7 +286,7 @@ if __name__ == "__main__":
 
     # Estimate the lighthouse positions
     estimator = Estimator()
-    geoStore = estimator.estimate(ids, args.write, args.invert)
+    geoStore = estimator.estimate(ids, args.write, args.invert, args.invert2)
 
     if args.csv:
         writeToCSV(geoStore)
