@@ -79,7 +79,7 @@ class Estimator:
             print("Write to CF failed!")
         self.write_event.set()
 
-    def estimate(self, ids, do_write, invert, invert2):
+    def estimate(self, ids, do_write, systype):
         cf = Crazyflie(rw_cache='./cache')
         geoStore = []
         geometries = {}
@@ -110,8 +110,8 @@ class Estimator:
                     geo.origin = position_bs_vector
                     geo.valid = True
 
-                    if invert or invert2:
-                        geo = self.invertBSCoord(geo, invert2)
+                    if systype != 0:
+                        geo = self.invertBSCoord(geo, systype)
 
                     geometries[id] = geo
 
@@ -175,7 +175,7 @@ class Estimator:
         uri = baseURI + '0' + str(id)
         return uri
 
-    def invertBSCoord(self, geo: LighthouseBsGeometry, invert2: bool) -> LighthouseBsGeometry:
+    def invertBSCoord(self, geo: LighthouseBsGeometry, systype: int) -> LighthouseBsGeometry:
         # Convert BS geo data to 4x4 numpy arrays -> TT and TR1
         rot = np.zeros((4, 4))
         tr = np.zeros((4, 4))
@@ -192,7 +192,7 @@ class Estimator:
                     tr[row][element] = 1
 
         # Create numpy array for required rotation matrix
-        if not invert2:
+        if systype == 1:
             invRot = np.array([[1, 0, 0, 0], [0, -1, 0, 0],
                               [0, 0, -1, 0], [0, 0, 0, 1]])
         else:
@@ -220,7 +220,7 @@ class Estimator:
                 newRot[row].append(t[row][element])
 
         # Fix z-axis at 8cm above the ground for inverted setups
-        if not invert2:
+        if systype == 1:
             newOrigin[2] = 0.08
         else:
             newOrigin[2] = 0.43
@@ -253,15 +253,16 @@ def writeToCSV(geoStore):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "--write", help="upload the calculated geo data to the Crazyflie", action="store_true")
+        "--write", help="Upload the calculated geo data to the Crazyflie", action="store_true")
     parser.add_argument(
-        "--csv", help="write calculated geo data to .csv file", action="store_true")
+        "--csv", help="Write calculated geo data to .csv file", action="store_true")
     parser.add_argument(
-        "--invert", help="use when LH deck is mounted under CF. Rotates base station co-ordinate systems around x-axis", action="store_true")
-    parser.add_argument(
-        "--invert2", help="use when LH deck is mounted under CF. Mirrors base station co-ordinate system in the y-plane", action="store_true")
+        "--systype", help="Basestation and lighthouse deck configuration. Arguments: 0-Standard | 1-Inverted LH+deck | 2-Inverted deck", action="store", type=int, default=0)
 
     args = parser.parse_args()
+
+    if args.systype not in [0, 1, 2]:
+        args.systype = 0
 
     # Only output errors from the logging framework
     logging.basicConfig(level=logging.ERROR)
@@ -279,8 +280,9 @@ if __name__ == "__main__":
         ids.append(int(crazyflie["id"]))
 
     # Estimate the lighthouse positions
+    print("Estimating for system type " + str(args.systype))
     estimator = Estimator()
-    geoStore = estimator.estimate(ids, args.write, args.invert, args.invert2)
+    geoStore = estimator.estimate(ids, args.write, args.systype)
 
     if args.csv:
         writeToCSV(geoStore)
