@@ -42,6 +42,7 @@
 #  EDIT:
 #  Script will now output base station positions ONLY to CSV in current directories
 #  Script can handle multiple CFs and pulls URIs from crazyflies.yaml
+#  Ability to choose between different lighthouse setups added with selection args
 #
 
 
@@ -268,7 +269,7 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.ERROR)
     cflib.crtp.init_drivers(enable_debug_driver=False)
 
-    # Load ids from crazyflies.yaml to build URIs for writing
+    # Load radio ids from crazyflies.yaml
     rospack = rospkg.RosPack()
     yamlPath = rospack.get_path('crazyswarm_lnkd')+"/launch/crazyflies.yaml"
 
