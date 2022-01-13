@@ -84,7 +84,7 @@ if __name__ == "__main__":
 
     # Program loop
 
-    input("\nPress any key to land...")
+    input("\nPress enter key to land...")
 
     allcfs.land(targetHeight=0.04, duration=2.5)
     timeHelper.sleep(3)
