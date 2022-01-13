@@ -55,6 +55,7 @@ import rospkg
 from pycrazyswarm import *
 import yaml
 from math import atan, cos, sin
+import time
 
 import cflib.crtp
 from cflib.crazyflie import Crazyflie
@@ -70,6 +71,7 @@ class Estimator:
         self.sensor_vectors_all = None
         self.collection_event = Event()
         self.write_event = Event()
+        self.result_received = False
 
     def angles_collected_cb(self, angles):
         self.sensor_vectors_all = angles
@@ -135,7 +137,25 @@ class Estimator:
                     helper.write_geos(geometries, self.write_done_cb)
                     self.write_event.wait()
 
+            with SyncCrazyflie(self.buildURI(id), cf=cf) as scf:
+                print('Persist data')
+                scf.cf.loc.receivedLocationPacket.add_callback(
+                    self._data_persisted)
+                scf.cf.loc.send_lh_persist_data_packet(
+                    list(range(16)), list(range(16)))
+
+                while not self.result_received:
+                    time.sleep(0.1)
+
         return geoStore
+
+    def _data_persisted(self, data):
+        if (data.data):
+            print('Data persisted')
+        else:
+            raise Exception("Write to storage failed")
+
+        self.result_received = True
 
     def print_geo(self, bsid, rotation_cf, position_cf, is_valid):
         #print('Base station ' + bsid + ' geometry:')
