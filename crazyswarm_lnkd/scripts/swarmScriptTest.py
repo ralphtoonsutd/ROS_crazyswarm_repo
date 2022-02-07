@@ -43,11 +43,10 @@ if __name__ == "__main__":
     try:
         while True:
             for count in range(0, 8, 1):
-                allcfs.crazyflies[0].goTo(circleIsh[count], 0, 1)
-                allcfs.crazyflies[1].goTo(verticalCircleIsh[count], 0, 1)
+                allcfs.goTo(circleIsh[count], 0, 1)
                 timeHelper.sleep(0.5)
     except KeyboardInterrupt:
-        pass
+        allcfs.emergency()
 
     input("\nPress any key to land...")
 

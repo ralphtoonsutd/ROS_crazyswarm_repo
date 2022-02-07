@@ -47,6 +47,7 @@
 
 
 import argparse
+from concurrent.futures.process import _threads_wakeups
 import logging
 import csv
 import numpy as np
@@ -64,6 +65,31 @@ from cflib.crazyflie.mem import LighthouseMemHelper
 from cflib.crazyflie.syncCrazyflie import SyncCrazyflie
 from cflib.localization import LighthouseBsGeoEstimator
 from cflib.localization import LighthouseSweepAngleAverageReader
+
+# Define the circular lighthouse positions
+geo0 = LighthouseBsGeometry()
+geo0.origin = [0, 0, 0]
+geo0.rotation_matrix = [[0.8660, 0.0, 0.5],
+                        [0.0, 1.0, 0.0], [-0.5, 0.0, 0.8660]]
+geo0.valid = True
+
+geo1 = LighthouseBsGeometry()
+geo1.origin = [0, 0, 0]
+geo1.rotation_matrix = [[0.0, -1.0, 0.0],
+                        [0.8660, 0.0, 0.5], [-0.5, 0.0, 0.8660]]
+geo1.valid = True
+
+geo2 = LighthouseBsGeometry()
+geo2.origin = [0, 0, 0]
+geo2.rotation_matrix = [[-0.8660, 0.0, -0.5],
+                        [0.0, -1.0, 0.0], [-0.5, 0.0, 0.8660]]
+geo2.valid = True
+
+geo3 = LighthouseBsGeometry()
+geo3.origin = [0, 0, 0]
+geo3.rotation_matrix = [[0.0, 1.0, 0.0],
+                        [-0.8660, 0.0, -0.5], [-0.5, 0, 0.8660]]
+geo3.valid = True
 
 
 class Estimator:
@@ -278,11 +304,11 @@ if __name__ == "__main__":
     parser.add_argument(
         "--csv", help="Write calculated geo data to .csv file", action="store_true")
     parser.add_argument(
-        "--systype", help="Basestation and lighthouse deck configuration. Arguments: 0-Standard | 1-Inverted LH+deck | 2-Inverted deck", action="store", type=int, default=0)
+        "--systype", help="Basestation and lighthouse deck configuration. Arguments: 0-Standard | 1-Inverted LH+deck | 2-Inverted deck | 3-Circular", action="store", type=int, default=0)
 
     args = parser.parse_args()
 
-    if args.systype not in [0, 1, 2]:
+    if args.systype not in [0, 1, 2, 3]:
         args.systype = 0
 
     # Only output errors from the logging framework
