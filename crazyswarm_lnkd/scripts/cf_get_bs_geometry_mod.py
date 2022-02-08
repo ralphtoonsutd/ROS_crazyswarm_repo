@@ -120,8 +120,8 @@ class Estimator:
 
                     geometries[id] = geo
 
-                    # self.print_geo(id, geo.rotation_matrix,
-                    #               geo.origin, is_valid)
+                    self.print_geo(id, geo.rotation_matrix,
+                                   geo.origin, is_valid)
 
                     # geoStore.append(position_bs_vector)
 
