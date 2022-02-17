@@ -30,8 +30,7 @@ def listener():
 
     #rospy.Subscriber("/cf231/pose/", PoseStamped, callback, queue_size=10)
 
-    rospy.Subscriber('/cf2/MR_values', GenericLogData,
-                     callback, callback_args=1, queue_size=10)
+    rospy.Subscriber('/cf2/MR_values', GenericLogData, callback, queue_size=10)
 
     # spin() simply keeps python from exiting until this node is stopped
     rospy.spin()
