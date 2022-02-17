@@ -9,10 +9,10 @@ from crazyswarm.msg import GenericLogData
 
 
 def callback(data):
-    rospy.loginfo("%f", data.range.front)
-    rospy.loginfo("%f", data.range.back)
-    rospy.loginfo("%f", data.range.left)
-    rospy.loginfo("%f", data.range.right)
+    rospy.loginfo("%f", data[0]]
+    rospy.loginfo("%f", data[1])
+    #rospy.loginfo("%f", data.range.left)
+    #rospy.loginfo("%f", data.range.right)
 
 
 def batteryCallBack(data, cfNum):
