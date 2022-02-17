@@ -32,13 +32,13 @@ if __name__ == "__main__":
 
     allcfs.takeoff(targetHeight=0.4, duration=2)
     timeHelper.sleep(2.5)
-    allcfs.goTo([0, 0.4, 0], 0, 1.0) #left
+    allcfs.goTo([0, 0.4, 0], 0, 1.0)  # left
     timeHelper.sleep(1.5)
-    allcfs.goTo([-0.4, 0, 0], 0, 1.0) #back
+    allcfs.goTo([0.4, 0, 0], 0, 1.0)  # forward
     timeHelper.sleep(1.5)
-    allcfs.goTo([0, -0.4, 0], 0, 1.0) #right
+    allcfs.goTo([-0.4, 0, 0], 0, 1.0)  # back
     timeHelper.sleep(1.5)
-    allcfs.goTo([0.4, 0, 0], 0, 1.0) #forward
+    allcfs.goTo([0, -0.4, 0], 0, 1.0)  # right
     timeHelper.sleep(1.5)
     allcfs.goTo([0, 0, 0.2], 0, 1.0)
     timeHelper.sleep(1.5)

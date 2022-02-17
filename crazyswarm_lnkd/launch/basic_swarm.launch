@@ -9,7 +9,7 @@
     <rosparam>
       # Logging configuration (Use enable_logging to actually enable logging)
       genericLogTopics: ["log1"]
-      genericLogTopicFrequencies: [10]
+      genericLogTopicFrequencies: [100]
       genericLogTopic_log1_Variables: ["range.front", "range.back", "range.left", "range.right"]
       # firmware parameters for all drones (use crazyflieTypes.yaml to set per type, or
       # allCrazyflies.yaml to set per drone)
