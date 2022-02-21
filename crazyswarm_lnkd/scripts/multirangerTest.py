@@ -7,16 +7,20 @@ from std_msgs.msg import *  # Bit wasteful lmao
 from geometry_msgs.msg import *
 from crazyswarm.msg import GenericLogData
 
+# Multiranger values are broadcast in following format:
+# ["range.front", "range.left", "range.back", "range.right"]
+
 
 def callback(data):
-    rospy.loginfo("%f", data[0]]
-    rospy.loginfo("%f", data[1])
-    #rospy.loginfo("%f", data.range.left)
-    #rospy.loginfo("%f", data.range.right)
+    """
+    rospy.loginfo("Front: %f", data.values[0])
+    rospy.loginfo("Left: %f", data.values[1])
+    rospy.loginfo("Back: %f", data.values[2])
+    rospy.loginfo("Right: %f", data.values[3])
+    """
 
-
-def batteryCallBack(data, cfNum):
-    rospy.loginfo("%f: I heard %f", cfNum, data.values[0])
+    print("\rFront: %f | Left: %f | Back: %f | Right: %f"
+          % (data.values[0], data.values[1], data.values[2], data.values[3]), end="\r")
 
 
 def listener():
@@ -26,7 +30,7 @@ def listener():
     # anonymous=True flag means that rospy will choose a unique
     # name for our 'listener' node so that multiple listeners can
     # run simultaneously.
-    rospy.init_node('listener', anonymous=True)
+    rospy.init_node('MR_Logger', anonymous=True)
 
     #rospy.Subscriber("/cf231/pose/", PoseStamped, callback, queue_size=10)
 

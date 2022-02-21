@@ -10,7 +10,7 @@
       # Logging configuration (Use enable_logging to actually enable logging)
       genericLogTopics: ["MR_values"]
       genericLogTopicFrequencies: [100]
-      genericLogTopic_MR_values_Variables: ["range.front", "range.back", "range.left", "range.right"]
+      genericLogTopic_MR_values_Variables: ["range.front", "range.left", "range.back", "range.right"]
       # firmware parameters for all drones (use crazyflieTypes.yaml to set per type, or
       # allCrazyflies.yaml to set per drone)
       firmwareParams:
