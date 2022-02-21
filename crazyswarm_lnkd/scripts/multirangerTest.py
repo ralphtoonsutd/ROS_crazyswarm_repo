@@ -5,7 +5,6 @@
 # ["range.front", "range.left", "range.back", "range.right"]
 
 # Python
-from time import time
 import numpy as np
 
 # ROS
