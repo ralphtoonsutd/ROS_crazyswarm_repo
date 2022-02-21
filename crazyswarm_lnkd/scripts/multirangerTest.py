@@ -38,7 +38,7 @@ def proximityCheck(data):
     if data.values[0] < 200:
         tooClose = True
 
-    else:
+    elif data.values[0] > 300:
         tooClose = False
 
 
