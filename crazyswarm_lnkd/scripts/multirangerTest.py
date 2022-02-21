@@ -1,44 +1,76 @@
 #!/usr/bin/env python
-from pycrazyswarm import crazyswarm_py
-from pycrazyswarm.crazyswarm_py import Crazyswarm
-import rospy
-import numpy as np
-from std_msgs.msg import *  # Bit wasteful lmao
-from geometry_msgs.msg import *
-from crazyswarm.msg import GenericLogData
 
+# Use the multiranger to navigate over an obsticle, stop, then land
 # Multiranger values are broadcast in following format:
 # ["range.front", "range.left", "range.back", "range.right"]
 
+# Python
+from time import time
+import numpy as np
 
-def callback(data):
-    """
-    rospy.loginfo("Front: %f", data.values[0])
-    rospy.loginfo("Left: %f", data.values[1])
-    rospy.loginfo("Back: %f", data.values[2])
-    rospy.loginfo("Right: %f", data.values[3])
-    """
+# ROS
+import rospy
+import rospkg
+from std_msgs.msg import *
+from geometry_msgs.msg import *
 
+# Crazyswarm
+from pycrazyswarm import *
+from crazyswarm.msg import GenericLogData
+
+# GLOBAL BLEGH
+tooClose = False
+
+
+def initSwarm():
+    print("CF swarm starting...")
+    rospack = rospkg.RosPack()
+    launchPath = rospack.get_path('crazyswarm_lnkd')+"/launch/crazyflies.yaml"
+    swarm = Crazyswarm(crazyflies_yaml=launchPath)
+    timeHelper = swarm.timeHelper
+
+    return swarm, timeHelper
+
+
+def proximityCheck(data):
     print("\rFront: %f | Left: %f | Back: %f | Right: %f"
           % (data.values[0], data.values[1], data.values[2], data.values[3]), end="\r")
 
+    if data.values[0] < 200:
+        tooClose = True
 
-def listener():
-
-    # In ROS, nodes are uniquely named. If two nodes with the same
-    # name are launched, the previous one is kicked off. The
-    # anonymous=True flag means that rospy will choose a unique
-    # name for our 'listener' node so that multiple listeners can
-    # run simultaneously.
-    rospy.init_node('MR_Logger', anonymous=True)
-
-    #rospy.Subscriber("/cf231/pose/", PoseStamped, callback, queue_size=10)
-
-    rospy.Subscriber('/cf2/MR_values', GenericLogData, callback, queue_size=10)
-
-    # spin() simply keeps python from exiting until this node is stopped
-    rospy.spin()
+    else:
+        tooClose = False
 
 
 if __name__ == '__main__':
-    listener()
+    # SETUP
+    swarm, timeHelper = initSwarm()
+    cf = swarm.allcfs.crazyflies[0]  # Only test with 1 cf this time
+
+    rospy.init_node('MR_Logger', anonymous=True)
+    rospy.Subscriber('/cf2/MR_values', GenericLogData,
+                     proximityCheck, queue_size=10)
+
+    # DO MOVES
+    cf.takeoff(0.4)
+    timeHelper.sleep(1.0)
+
+    # Move forward to wall
+    while (not tooClose):
+        cf.goto([0.1, 0.0, 0.0], 0, 0.3, relative=True)
+        timeHelper.sleep(0.4)
+
+    # Move up over wall height
+    while(tooClose):
+        cf.goto([0.0, 0.0, 0.3], 0, 0.5, relative=True)
+        timeHelper.sleep(0.5)
+
+    timeHelper.sleep(1.0)
+
+    cf.goto([1.0, 0.0, 0.0], 0, 1.5, relative=True)
+    timeHelper.sleep(2.0)
+
+    cf.land(targetHeight=0.04, duration=2.5)
+    timeHelper.sleep(3)
+    cf.stop()
