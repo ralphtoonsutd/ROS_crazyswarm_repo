@@ -32,6 +32,7 @@ def initSwarm():
 
 
 def proximityCheck(data):
+    print("checking distance")
     print("\rFront: %f | Left: %f | Back: %f | Right: %f"
           % (data.values[0], data.values[1], data.values[2], data.values[3]), end="\r")
 
@@ -47,29 +48,34 @@ if __name__ == '__main__':
     swarm, timeHelper = initSwarm()
     cf = swarm.allcfs.crazyflies[0]  # Only test with 1 cf this time
 
-    rospy.init_node('MR_Logger', anonymous=True)
+    #rospy.init_node('MR_Logger', anonymous=True)
     rospy.Subscriber('/cf2/MR_values', GenericLogData,
                      proximityCheck, queue_size=10)
-
+    
+    #rospy.spin()
+    """
     # DO MOVES
-    cf.takeoff(0.4)
-    timeHelper.sleep(1.0)
+    cf.takeoff(0.4, 1.0)
+    timeHelper.sleep(1.5)
 
     # Move forward to wall
     while (not tooClose):
-        cf.goto([0.1, 0.0, 0.0], 0, 0.3, relative=True)
+        cf.goTo([0.1, 0.0, 0.0], 0, 0.3, relative=True)
         timeHelper.sleep(0.4)
 
     # Move up over wall height
     while(tooClose):
-        cf.goto([0.0, 0.0, 0.3], 0, 0.5, relative=True)
+        cf.goTo([0.0, 0.0, 0.3], 0, 0.5, relative=True)
         timeHelper.sleep(0.5)
 
     timeHelper.sleep(1.0)
-
-    cf.goto([1.0, 0.0, 0.0], 0, 1.5, relative=True)
+    cf.goTo([1.0, 0.0, 0.0], 0, 1.5, relative=True)
     timeHelper.sleep(2.0)
 
     cf.land(targetHeight=0.04, duration=2.5)
     timeHelper.sleep(3)
     cf.stop()
+    """
+    while(1):
+        print(tooClose)
+        rospy.spin()
