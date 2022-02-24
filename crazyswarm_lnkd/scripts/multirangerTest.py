@@ -5,6 +5,7 @@
 # ["range.front", "range.left", "range.back", "range.right"]
 
 # Python
+import time
 import numpy as np
 
 # ROS
@@ -12,16 +13,15 @@ import rospy
 import rospkg
 from std_msgs.msg import *
 from geometry_msgs.msg import *
+from crazyswarm_lnkd.srv import *
 
 # Crazyswarm
 from pycrazyswarm import *
 from crazyswarm.msg import GenericLogData
 
-# GLOBAL BLEGH
-tooClose = False
-
 
 def initSwarm():
+    # rospy.wait_for_service("MR_checker")
     print("CF swarm starting...")
     rospack = rospkg.RosPack()
     launchPath = rospack.get_path('crazyswarm_lnkd')+"/launch/crazyflies.yaml"
@@ -48,26 +48,29 @@ if __name__ == '__main__':
     swarm, timeHelper = initSwarm()
     cf = swarm.allcfs.crazyflies[0]  # Only test with 1 cf this time
 
-    #rospy.init_node('MR_Logger', anonymous=True)
-    rospy.Subscriber('/cf2/MR_values', GenericLogData,
-                     proximityCheck, queue_size=10)
-    
-    #rospy.spin()
-    """
+    MR_checker = rospy.ServiceProxy(
+        "MR_checker", MRProximityAlert, persistent=True)
+    status = MR_checker(1)
+
+    print("Front: %f" % (status.MRAlert[0]), end="\r")
+
     # DO MOVES
     cf.takeoff(0.4, 1.0)
     timeHelper.sleep(1.5)
 
     # Move forward to wall
-    while (not tooClose):
+    while (status.MRAlert[0] == 0):
         cf.goTo([0.1, 0.0, 0.0], 0, 0.3, relative=True)
         timeHelper.sleep(0.4)
+        status = MR_checker(1)
 
     # Move up over wall height
-    while(tooClose):
+    while(status.MRAlert[0] != 0):
         cf.goTo([0.0, 0.0, 0.3], 0, 0.5, relative=True)
         timeHelper.sleep(0.5)
+        status = MR_checker(1)
 
+    MR_checker.close()
     timeHelper.sleep(1.0)
     cf.goTo([1.0, 0.0, 0.0], 0, 1.5, relative=True)
     timeHelper.sleep(2.0)
@@ -75,7 +78,3 @@ if __name__ == '__main__':
     cf.land(targetHeight=0.04, duration=2.5)
     timeHelper.sleep(3)
     cf.stop()
-    """
-    while(1):
-        print(tooClose)
-        rospy.spin()
