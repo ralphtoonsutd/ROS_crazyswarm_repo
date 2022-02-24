@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#! /usr/bin/python3
 
 # PROGRAM STRUCTURE
 # 1. Setup ROS node
@@ -15,7 +15,7 @@ from crazyswarm_lnkd.srv import MRProximityAlert, MRProximityAlertResponse
 # Globals (for now, later use class/dictionary to handle)
 mrStatus = [0, 0, 0, 0]  # Default all sensors warnings to be false
 
-PROXIMITYLIMIT = 200.0
+PROXIMITYLIMIT = 400.0
 
 
 def mrListener(data):
