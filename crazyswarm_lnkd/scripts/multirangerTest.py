@@ -6,6 +6,7 @@
 
 # Python
 import time
+from turtle import st
 import numpy as np
 
 # ROS
@@ -60,9 +61,13 @@ if __name__ == '__main__':
 
     # Move forward to wall
     while (status.MRAlert[0] == 0):
-        cf.goTo([0.1, 0.0, 0.0], 0, 0.3, relative=True)
+        cf.goTo([0.05, 0.0, 0.0], 0, 0.3, relative=True)
         timeHelper.sleep(0.4)
         status = MR_checker(1)
+        print(status)
+        timeHelper.sleep(1)
+
+    """
 
     # Move up over wall height
     while(status.MRAlert[0] != 0):
@@ -74,7 +79,7 @@ if __name__ == '__main__':
     timeHelper.sleep(1.0)
     cf.goTo([1.0, 0.0, 0.0], 0, 1.5, relative=True)
     timeHelper.sleep(2.0)
-
+    """
     cf.land(targetHeight=0.04, duration=2.5)
     timeHelper.sleep(3)
     cf.stop()

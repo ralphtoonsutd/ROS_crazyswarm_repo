@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#! /usr/bin/python3
 
 # PROGRAM STRUCTURE
 # 1. Setup ROS node
