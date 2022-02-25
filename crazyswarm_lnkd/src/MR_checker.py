@@ -9,38 +9,67 @@
 
 
 import rospy
+import rospkg
+from rosnode import kill_nodes
+
 from crazyswarm.msg import GenericLogData
+from pycrazyswarm import *
 from crazyswarm_lnkd.srv import MRProximityAlert, MRProximityAlertResponse
 
-# Globals (for now, later use class/dictionary to handle)
-mrStatus = [0, 0, 0, 0]  # Default all sensors warnings to be false
-
-PROXIMITYLIMIT = 200.0
+PROXIMITYLIMIT = 400.0
 
 
-def mrListener(data):
+class MRDrones:
+    def __init__(self) -> None:
+        # Store the MR values in a dictionary with format ID:[0,0,0,0]
+        self.droneMRValues = {}
+        self.setDroneIDs()
+
+    def setDroneIDs(self):
+        rospack = rospkg.RosPack()
+        yamlPath = rospack.get_path(
+            'crazyswarm_lnkd')+"/launch/crazyflies.yaml"
+        swarm = Crazyswarm(crazyflies_yaml=yamlPath)
+
+        self.droneMRValues.clear()
+        for cf in swarm.allcfs.crazyflies:
+            if cf.getParam("deck/bcMultiranger"):
+                self.droneMRValues[cf.id] = [0, 0, 0, 0]
+
+        rospy.loginfo(self.droneMRValues)
+
+        kill_nodes("CrazyflieAPI")
+
+    def updateMRValue(self, droneID, values):
+        self.droneMRValues[droneID] = values
+
+    def getMRValue(self, id):
+        return self.droneMRValues.get(id)
+
+    def getDroneIDs(self):
+        return self.droneMRValues.keys()
+
+
+def mrDataCallback(data, key):
     # Multiranger values are broadcast in following format:
     # ["range.front", "range.left", "range.back", "range.right"]
-    global mrStatus
-
-    for i, value in enumerate(data.values):
-        if value < PROXIMITYLIMIT:
-            mrStatus[i] = 1
-        else:
-            mrStatus[i] = 0
-
-    print("\rFront: %f | Left: %f | Back: %f | Right: %f"
-          % (data.values[0], data.values[1], data.values[2], data.values[3]), end="\r")
+    mrDroneGroup.updateMRValue(key, data.values)
 
 
-def sendMRStatus(arg):
-    return MRProximityAlertResponse(mrStatus)
+def sendMRStatus(req):
+    if req.cfID in mrDroneGroup.getDroneIDs():
+        data = mrDroneGroup.getMRValue(req.cfID)
+        return MRProximityAlertResponse(data)
 
+
+mrDroneGroup = MRDrones()
 
 if __name__ == "__main__":
-    rospy.init_node('MR_checker')
     responseSrv = rospy.Service('MR_checker', MRProximityAlert, sendMRStatus)
-    rospy.Subscriber('/cf2/MR_values', GenericLogData,
-                     mrListener, queue_size=10)
+
+    for key in mrDroneGroup.getDroneIDs():
+        topicName = '/cf' + str(key) + '/MR_values'
+        rospy.Subscriber(topicName, GenericLogData,
+                         callback=mrDataCallback, callback_args=key, queue_size=10)
 
     rospy.spin()
