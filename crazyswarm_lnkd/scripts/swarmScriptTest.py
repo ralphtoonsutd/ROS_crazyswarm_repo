@@ -69,13 +69,8 @@ if __name__ == "__main__":
     swarm, timeHelper = initSwarm()
     allcfs = swarm.allcfs
 
-<<<<<<< Updated upstream
-    allcfs.takeoff(targetHeight=0.4, duration=2)
-    timeHelper.sleep(4)
-=======
     allcfs.takeoff(targetHeight=1.0, duration=2)
     timeHelper.sleep(2.5)
->>>>>>> Stashed changes
     allcfs.goTo([0, 0.4, 0], 0, 1.0)  # left
     timeHelper.sleep(1.5)
     allcfs.goTo([0.4, 0, 0], 0, 1.0)  # forward
