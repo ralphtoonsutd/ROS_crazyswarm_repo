@@ -31,7 +31,7 @@ if __name__ == "__main__":
     allcfs = swarm.allcfs
 
     allcfs.takeoff(targetHeight=0.4, duration=2)
-    timeHelper.sleep(2.5)
+    timeHelper.sleep(4)
     allcfs.goTo([0, 0.4, 0], 0, 1.0)  # left
     timeHelper.sleep(1.5)
     allcfs.goTo([0.4, 0, 0], 0, 1.0)  # forward
