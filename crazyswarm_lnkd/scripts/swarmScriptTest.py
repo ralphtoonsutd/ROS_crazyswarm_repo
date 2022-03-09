@@ -27,15 +27,15 @@ def initSwarm():
 def fblrMovementDemo(swarm: Crazyswarm, timeHelper):
     allcfs = swarm.allcfs
     allcfs.goTo([0, 1.0, 0], 0, 2.0)    # left
-    timeHelper.sleep(3.0)
+    timeHelper.sleep(5.0)
     allcfs.goTo([-1.0, 0, 0], 0, 2.0)   # back
-    timeHelper.sleep(3.0)
+    timeHelper.sleep(5.0)
     allcfs.goTo([1.0, 0, 0], 0, 2.0)    # forward
-    timeHelper.sleep(3.0)
+    timeHelper.sleep(5.0)
     allcfs.goTo([0, -1.0, 0], 0, 2.0)   # right
-    timeHelper.sleep(3.0)
+    timeHelper.sleep(5.0)
     allcfs.goTo([0, 0, 0.3], 0, 2.0)    # up
-    timeHelper.sleep(3.0)
+    timeHelper.sleep(5.0)
 
 
 def wallScam(swarm: Crazyswarm, timeHelper):
@@ -45,16 +45,24 @@ def wallScam(swarm: Crazyswarm, timeHelper):
     # Move forward up to wall, then go up, over, then down
     # Check if z-ranger needs to be turned off while clearing the wall, it might make the drones jump
     allcfs = swarm.allcfs
-    allcfs.goTo([0.5, 0, 0], 0, 2.0)    # 1m forwards
+    allcfs.goTo([1.0, 0, 0], 0, 2.0)    # 1m forwards
     timeHelper.sleep(2.5)
 
     allcfs.goTo([0, 0, 1.8], 0, 2.5)    # 1.8m up, gives total height of 2.8m
     timeHelper.sleep(3.0)
+    allcfs.setParam("tof/enable", 0)
+    timeHelper.sleep(2.0)
+    # allcfs.goTo([0, 0, 0.5], 0, 2.5)    # 1.8m up, gives total height of 2.8m
+    # timeHelper.sleep(3.0)
 
     allcfs.goTo([2.0, 0, 0], 0, 3.0)    # 2m forward should clear all drones
     timeHelper.sleep(4.0)
+    # allcfs.goTo([0, 0, -1.5], 0, 2.5)   # Return to normal flight height
+    # timeHelper.sleep(3.0)
 
-    allcfs.goTo([0, 0, -1.8], 0, 2.5)   # Return to normal flight height
+    #allcfs.setParam("tof/enable", 1)
+    timeHelper.sleep(2.0)
+    allcfs.goTo([0, 0, -1.5], 0, 2.5)   # Return to normal flight height
     timeHelper.sleep(3.0)
 
 
@@ -65,8 +73,8 @@ def bambooForestScam(swarm: Crazyswarm, timeHelper):
     # MAKE SURE DRONES ARE SET UP IN A LINE FORMATION FOR THIS DEMO
 
     # These are ABSOLUTE co-ordinates
-    forestPath = [[0, 2.0, 0.7], [0.25, 2.0, 0.7], [0.5, 2.0, 0.7], [
-        0.75, 2.0, 0.7], [1.0, 2.0, 0.7], [1.5, 2.0, 0.7], [1.85, 2.35, 0.7], [2.2, 2.0, 0.7], [2.75, 2.0, 0.7], [3.0, 2.0, 0.7], [3.25, 2.0, 0.7], [3.5, 2.0, 0.7], [3.75, 2.0, 0.7]]
+    forestPath = [[0, 2.0, 0.7], [0.40, 2.0, 0.7], [0.80, 2.0, 0.7], [
+        1.2, 2.0, 0.7], [1.6, 2.0, 0.7], [2.1, 2.0, 0.7], [2.45, 2.6, 0.7], [3.0, 2.0, 0.7], [3.5, 2.0, 0.7], [3.9, 2.0, 0.7], [4.3, 2.0, 0.7], [4.7, 2.0, 0.7], [5.1, 2.0, 0.7]]
 
     for n in range(0, len(forestPath)-5):
         for m, cf in enumerate(swarm.allcfs.crazyflies):
@@ -77,16 +85,22 @@ def bambooForestScam(swarm: Crazyswarm, timeHelper):
 def hoopScam(swarm: Crazyswarm, timeHelper):
     # THIS DOESNT ACTUALLY COMPLETE THE HOOPS :)
     # Just works through a predefined list of co-ordinates, with no sensor inputs
-
-    HH = 1.5    # Hoop height
+    allcfs = swarm.allcfs
+    HH = 1.4    # Hoop height
     # MAKE SURE DRONES ARE SET UP IN A LINE FORMATION FOR THIS DEMO
-    hoopPath = [[0, 2.0, HH], [0.25, 2.0, HH], [0.5, 2.0, HH], [
-        0.75, 2.0, HH], [1.0, 2.0, HH], [1.5, 3.0, HH], [2.0, 3.0, HH], [2.5, 1.0, HH], [3.0, 1.0, HH], [3.25, 1.0, HH], [3.5, 1.0, HH], [3.75, 1.0, HH], [4.0, 1.0, HH]]
+    hoopPath = [[0, 2.0, HH], [0.4, 2.0, HH], [0.8, 2.0, HH], [
+        1.2, 2.0, HH], [1.6, 2.0, HH], [2.1, 3.0, HH], [2.6, 3.0, HH], [3.1, 2.0, HH], [3.7, 2.0, HH], [4.1, 2.0, HH], [4.5, 2.0, HH], [4.9, 2.0, HH], [5.3, 2.0, HH]]
 
+    allcfs.setParam("tof/enable", 0)
+    timeHelper.sleep(2.0)
     for n in range(0, len(hoopPath)-5):
         for m, cf in enumerate(swarm.allcfs.crazyflies):
-            cf.goTo(hoopPath[n+4-m], 0, 3.0)
-        timeHelper.sleep(2.8)
+            cf.goTo(hoopPath[n+4-m], 0, 2.0)
+        timeHelper.sleep(3.0)
+
+    timeHelper.sleep(3.0)
+    allcfs.setParam("tof/enable", 1)
+    timeHelper.sleep(2.0)
 
 
 def circleArrangement(swarm: Crazyswarm, timeHelper, centreCoord):
@@ -161,15 +175,21 @@ def calcMovePlaneValue(droneNum, numPlanes):
 
 if __name__ == "__main__":
     swarm, timeHelper = initSwarm()
-    swarm.allcfs.takeoff(targetHeight=1.0, duration=2)
-    timeHelper.sleep(2.5)
+
+    swarm.allcfs.setParam("kalman/resetEstimation", 1)
+    timeHelper.sleep(0.1)
+    swarm.allcfs.setParam("kalman/resetEstimation", 0)
+    timeHelper.sleep(1.0)
+
+    swarm.allcfs.takeoff(targetHeight=0.5, duration=2)
+    timeHelper.sleep(5.0)
 
     # UNCOMMENT THE MOVE THAT YOU WANT TO DO FROM FOLLOWING LIST
     #fblrMovementDemo(swarm, timeHelper)
-    wallScam(swarm, timeHelper)
+    #wallScam(swarm, timeHelper)
     #bambooForestScam(swarm, timeHelper)
-    #hoopScam(swarm, timeHelper)
-    circleArrangement()
+    hoopScam(swarm, timeHelper)
+    # circleArrangement()
 
     input("\nPress any key to land...")
     swarm.allcfs.land(targetHeight=0.04, duration=2.5)
