@@ -2,7 +2,6 @@
 
 # Python
 import numpy as np
-from time import time
 import rospkg
 
 # Crazyswarm
@@ -25,11 +24,8 @@ def initSwarm():
     return swarm, timeHelper
 
 
-def fblrMovementDemo(swarm: Crazyswarm):
+def fblrMovementDemo(swarm: Crazyswarm, timeHelper):
     allcfs = swarm.allcfs
-
-    allcfs.takeoff(targetHeight=1.0, duration=2)
-    timeHelper.sleep(2.5)
     allcfs.goTo([0, 1.0, 0], 0, 2.0)    # left
     timeHelper.sleep(3.0)
     allcfs.goTo([-1.0, 0, 0], 0, 2.0)   # back
@@ -42,22 +38,84 @@ def fblrMovementDemo(swarm: Crazyswarm):
     timeHelper.sleep(3.0)
 
 
-def circleArrangement(swarm: Crazyswarm, centreCoord):
+def wallScam(swarm: Crazyswarm, timeHelper):
+    # THIS DOESNT ACTUALLY COMPLETE THE WALL :)
+    # Just works through a predefined list of moves, with no sensor inputs
+
+    # Move forward up to wall, then go up, over, then down
+    # Check if z-ranger needs to be turned off while clearing the wall, it might make the drones jump
+    allcfs = swarm.allcfs
+    allcfs.goTo([0.5, 0, 0], 0, 2.0)    # 1m forwards
+    timeHelper.sleep(2.5)
+
+    allcfs.goTo([0, 0, 1.8], 0, 2.5)    # 1.8m up, gives total height of 2.8m
+    timeHelper.sleep(3.0)
+
+    allcfs.goTo([2.0, 0, 0], 0, 3.0)    # 2m forward should clear all drones
+    timeHelper.sleep(4.0)
+
+    allcfs.goTo([0, 0, -1.8], 0, 2.5)   # Return to normal flight height
+    timeHelper.sleep(3.0)
+
+
+def bambooForestScam(swarm: Crazyswarm, timeHelper):
+    # THIS DOESNT ACTUALLY COMPLETE THE FOREST :)
+    # Just works through a predefined list of co-ordinates, with no sensor inputs
+
+    # MAKE SURE DRONES ARE SET UP IN A LINE FORMATION FOR THIS DEMO
+
+    # These are ABSOLUTE co-ordinates
+    forestPath = [[0, 2.0, 0.7], [0.25, 2.0, 0.7], [0.5, 2.0, 0.7], [
+        0.75, 2.0, 0.7], [1.0, 2.0, 0.7], [1.5, 2.0, 0.7], [1.85, 2.35, 0.7], [2.2, 2.0, 0.7], [2.75, 2.0, 0.7], [3.0, 2.0, 0.7], [3.25, 2.0, 0.7], [3.5, 2.0, 0.7], [3.75, 2.0, 0.7]]
+
+    for n in range(0, len(forestPath)-5):
+        for m, cf in enumerate(swarm.allcfs.crazyflies):
+            cf.goTo(forestPath[n+4-m], 0, 2.0)
+        timeHelper.sleep(1.8)
+
+
+def hoopScam(swarm: Crazyswarm, timeHelper):
+    # THIS DOESNT ACTUALLY COMPLETE THE HOOPS :)
+    # Just works through a predefined list of co-ordinates, with no sensor inputs
+
+    HH = 1.5    # Hoop height
+    # MAKE SURE DRONES ARE SET UP IN A LINE FORMATION FOR THIS DEMO
+    hoopPath = [[0, 2.0, HH], [0.25, 2.0, HH], [0.5, 2.0, HH], [
+        0.75, 2.0, HH], [1.0, 2.0, HH], [1.5, 3.0, HH], [2.0, 3.0, HH], [2.5, 1.0, HH], [3.0, 1.0, HH], [3.25, 1.0, HH], [3.5, 1.0, HH], [3.75, 1.0, HH], [4.0, 1.0, HH]]
+
+    for n in range(0, len(hoopPath)-5):
+        for m, cf in enumerate(swarm.allcfs.crazyflies):
+            cf.goTo(hoopPath[n+4-m], 0, 3.0)
+        timeHelper.sleep(2.8)
+
+
+def circleArrangement(swarm: Crazyswarm, timeHelper, centreCoord):
     # Takes centre co-ordinates and moves the swarm into a circle around them
 
+    # 1. Split drones into 5 different movement planes
     for num, cf in enumerate(swarm.allcfs.crazyflies):
-        # 1. Create drone co-ord from its formation position and the formation's centre
+        height = calcMovePlaneValue(num, 5)
+        cf.goTo([0, 0, height], 0, 2.5, relative=True)
+
+    timeHelper.sleep(2.5)
+
+    for num, cf in enumerate(swarm.allcfs.crazyflies):
+        # 2. Create drone co-ord from its formation position and the formation's centre
         formationPos = [0.0, 0.0, 0.0]
         for count, initialPos in enumerate(cf.initialPosition):
             formationPos[count] = centreCoord[count] + initialPos[count]
 
-        # 2. Split drones into 5 different movement planes
-        height = calcMovePlaneValue(num, 5)
-        cf.goTo([0, 0, height], 0, 2.5, relative=True)
-
-        # 3. Move to position and return to previous height
+        # 3. Move to position
         cf.goTo(formationPos, 0, 2.5, relative=False)
+
+    timeHelper.sleep(2.5)
+
+    # 4. Return to normal height
+    for num, cf in enumerate(swarm.allcfs.crazyflies):
+        height = calcMovePlaneValue(num, 5)
         cf.goTo([0, 0, -height], 0, 2.5, relative=True)
+
+    timeHelper.sleep(2.5)
 
     # Following code is here as an example only, do NOT uncomment
     # Wherever the CFs take off from, move them into their correct default positions
@@ -71,17 +129,28 @@ def circleArrangement(swarm: Crazyswarm, centreCoord):
 
 def lineArrangement(swarm: Crazyswarm, startCoord):
     # Takes co-ord for start of the line and moves CFs into formation behind
-    for num, cf in enumerate(swarm.allcfs.crazyflies):
-        # 1. Create drone co-ord in the line
-        formationPos = startCoord + [num*-0.25, 0, 0]
 
-        # 2. Split drones into 5 different movement planes
+    # 1. Split drones into 5 different movement planes
+    for num, cf in enumerate(swarm.allcfs.crazyflies):
         height = calcMovePlaneValue(num, 5)
         cf.goTo([0, 0, height], 0, 2.5, relative=True)
 
-        # 3. Move to position and return to previous height
+    timeHelper.sleep(2.5)
+
+    for num, cf in enumerate(swarm.allcfs.crazyflies):
+        # 2. Create drone co-ord from its formation position and the formation's centre
+        formationPos = startCoord + [num*-0.25, 0, 0]
+        # 3. Move to position
         cf.goTo(formationPos, 0, 2.5, relative=False)
+
+    timeHelper.sleep(2.5)
+
+    # 4. Return to normal height
+    for num, cf in enumerate(swarm.allcfs.crazyflies):
+        height = calcMovePlaneValue(num, 5)
         cf.goTo([0, 0, -height], 0, 2.5, relative=True)
+
+    timeHelper.sleep(2.5)
 
 
 def calcMovePlaneValue(droneNum, numPlanes):
@@ -92,8 +161,15 @@ def calcMovePlaneValue(droneNum, numPlanes):
 
 if __name__ == "__main__":
     swarm, timeHelper = initSwarm()
+    swarm.allcfs.takeoff(targetHeight=1.0, duration=2)
+    timeHelper.sleep(2.5)
 
-    fblrMovementDemo(swarm)
+    # UNCOMMENT THE MOVE THAT YOU WANT TO DO FROM FOLLOWING LIST
+    #fblrMovementDemo(swarm, timeHelper)
+    wallScam(swarm, timeHelper)
+    #bambooForestScam(swarm, timeHelper)
+    #hoopScam(swarm, timeHelper)
+    circleArrangement()
 
     input("\nPress any key to land...")
     swarm.allcfs.land(targetHeight=0.04, duration=2.5)
