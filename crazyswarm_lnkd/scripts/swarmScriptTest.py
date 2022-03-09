@@ -8,21 +8,38 @@ import rospkg
 # Crazyswarm
 from pycrazyswarm import *
 
-circleIsh = [[0.0, 0.5, 0.6], [0.35, 0.357, 0.6], [0.5, 0.0, 0.6], [0.35, -0.357, 0.6],
-             [0.0, -0.5, 0.6], [-0.35, -0.357, 0.6], [-0.5, 0.0, 0.6], [-0.35, 0.357, 0.6]]
-
-verticalCircleIsh = [[0.5, 0.0, 0.6], [0.29, 0.0, 0.42], [0.0, 0.0, 0.38], [-0.29, 0.0, 0.42],
-                     [-0.5, 0.0, 0.6], [-0.29, 0.0, 0.78], [0.0, 0.0, 0.82], [0.29, 0.0, 0.78]]
-
 
 def initSwarm():
     print("CF swarm starting...")
+
+    # Build swarm objects from .yaml file
     rospack = rospkg.RosPack()
     launchPath = rospack.get_path('crazyswarm_lnkd')+"/launch/crazyflies.yaml"
     swarm = Crazyswarm(crazyflies_yaml=launchPath)
     timeHelper = swarm.timeHelper
 
+    # Set params for UWB positioning mode (TDoA3) and robust estimation method
+    swarm.allcfs.setParam("loco/mode", 3)
+    swarm.allcfs.setParam("kalman/robustTdoa", 1)
+
     return swarm, timeHelper
+
+
+def fblrMovementDemo(swarm: Crazyswarm):
+    allcfs = swarm.allcfs
+
+    allcfs.takeoff(targetHeight=1.0, duration=2)
+    timeHelper.sleep(2.5)
+    allcfs.goTo([0, 1.0, 0], 0, 2.0)    # left
+    timeHelper.sleep(3.0)
+    allcfs.goTo([-1.0, 0, 0], 0, 2.0)   # back
+    timeHelper.sleep(3.0)
+    allcfs.goTo([1.0, 0, 0], 0, 2.0)    # forward
+    timeHelper.sleep(3.0)
+    allcfs.goTo([0, -1.0, 0], 0, 2.0)   # right
+    timeHelper.sleep(3.0)
+    allcfs.goTo([0, 0, 0.3], 0, 2.0)    # up
+    timeHelper.sleep(3.0)
 
 
 def circleArrangement(swarm: Crazyswarm, centreCoord):
@@ -41,6 +58,15 @@ def circleArrangement(swarm: Crazyswarm, centreCoord):
         # 3. Move to position and return to previous height
         cf.goTo(formationPos, 0, 2.5, relative=False)
         cf.goTo([0, 0, -height], 0, 2.5, relative=True)
+
+    # Following code is here as an example only, do NOT uncomment
+    # Wherever the CFs take off from, move them into their correct default positions
+    """
+    for cf in allcfs.crazyflies:
+        pos = np.array(cf.initialPosition) + np.array([0, 0, 0.5])
+        cf.goTo(pos, 0, 2.0)
+    timeHelper.sleep(2.5)
+    """
 
 
 def lineArrangement(swarm: Crazyswarm, startCoord):
@@ -65,41 +91,10 @@ def calcMovePlaneValue(droneNum, numPlanes):
 
 
 if __name__ == "__main__":
-
     swarm, timeHelper = initSwarm()
-    allcfs = swarm.allcfs
 
-    allcfs.takeoff(targetHeight=0.5, duration=2)
-    timeHelper.sleep(2.5)
-    allcfs.goTo([0, 1.0, 0], 0, 2.0)  # left
-    timeHelper.sleep(3.0)
-    allcfs.goTo([-1.0, 0, 0], 0, 2.0)  # back
-    timeHelper.sleep(3.0)
-    allcfs.goTo([1.0, 0, 0], 0, 2.0)  # forward
-    timeHelper.sleep(3.0)
-    allcfs.goTo([0, -1.0, 0], 0, 2.0)  # right
-    timeHelper.sleep(3.0)
-    allcfs.goTo([0, 0, 0.2], 0, 2.0)  # up
-    timeHelper.sleep(3.0)
+    fblrMovementDemo(swarm)
 
-    # Wherever the CFs take off from, move them into their correct default positions
-    """
-    for cf in allcfs.crazyflies:
-        pos = np.array(cf.initialPosition) + np.array([0, 0, 0.5])
-        cf.goTo(pos, 0, 2.0)
-    timeHelper.sleep(2.5)
-    """
-    # Do the circle movement and break on ctrl+C
-    """
-    try:
-        while True:
-            for count in range(0, 8, 1):
-                allcfs.goTo(circleIsh[count], 0, 1)
-                timeHelper.sleep(0.5)
-    except KeyboardInterrupt:
-        allcfs.emergency()
-    """
     input("\nPress any key to land...")
-
-    allcfs.land(targetHeight=0.04, duration=2.5)
+    swarm.allcfs.land(targetHeight=0.04, duration=2.5)
     timeHelper.sleep(3)
