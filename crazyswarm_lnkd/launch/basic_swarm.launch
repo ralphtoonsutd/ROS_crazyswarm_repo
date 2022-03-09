@@ -10,7 +10,7 @@
       # Logging configuration (Use enable_logging to actually enable logging)
       genericLogTopics: ["MR_values"]
       genericLogTopicFrequencies: [100]
-      genericLogTopic_MR_values_Variables: ["range.front", "range.left", "range.back", "range.right"]
+      genericLogTopic_MR_values_Variables: []
       # firmware parameters for all drones (use crazyflieTypes.yaml to set per type, or
       # allCrazyflies.yaml to set per drone)
       firmwareParams:
@@ -46,7 +46,7 @@
     </rosparam>
   </node>
 
-  <node pkg="crazyswarm_lnkd" type="MR_checker.py" name="MR_checker" />
+  <!-- <node pkg="crazyswarm_lnkd" type="MR_checker.py" name="MR_checker" /> -->
 
   <node name="rviz" pkg="rviz" type="rviz" args="-d $(find crazyswarm)/launch/test.rviz" />
 

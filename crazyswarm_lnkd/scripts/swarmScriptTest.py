@@ -69,18 +69,18 @@ if __name__ == "__main__":
     swarm, timeHelper = initSwarm()
     allcfs = swarm.allcfs
 
-    allcfs.takeoff(targetHeight=1.0, duration=2)
+    allcfs.takeoff(targetHeight=0.5, duration=2)
     timeHelper.sleep(2.5)
-    allcfs.goTo([0, 0.4, 0], 0, 1.0)  # left
-    timeHelper.sleep(1.5)
-    allcfs.goTo([0.4, 0, 0], 0, 1.0)  # forward
-    timeHelper.sleep(1.5)
-    allcfs.goTo([-0.4, 0, 0], 0, 1.0)  # back
-    timeHelper.sleep(1.5)
-    allcfs.goTo([0, -0.4, 0], 0, 1.0)  # right
-    timeHelper.sleep(1.5)
-    allcfs.goTo([0, 0, 0.2], 0, 1.0)
-    timeHelper.sleep(1.5)
+    allcfs.goTo([0, 1.0, 0], 0, 2.0)  # left
+    timeHelper.sleep(3.0)
+    allcfs.goTo([-1.0, 0, 0], 0, 2.0)  # back
+    timeHelper.sleep(3.0)
+    allcfs.goTo([1.0, 0, 0], 0, 2.0)  # forward
+    timeHelper.sleep(3.0)
+    allcfs.goTo([0, -1.0, 0], 0, 2.0)  # right
+    timeHelper.sleep(3.0)
+    allcfs.goTo([0, 0, 0.2], 0, 2.0)  # up
+    timeHelper.sleep(3.0)
 
     # Wherever the CFs take off from, move them into their correct default positions
     """
