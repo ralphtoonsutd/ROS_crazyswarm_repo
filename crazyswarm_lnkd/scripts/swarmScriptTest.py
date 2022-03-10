@@ -183,12 +183,31 @@ if __name__ == "__main__":
 
     swarm.allcfs.takeoff(targetHeight=0.5, duration=2)
     timeHelper.sleep(5.0)
+    
+    allcfs = swarm.allcfs
+
+    allcfs.goTo([1.0, 0, 0], 0, 2.0)    # forward
+    timeHelper.sleep(5.0)
+    allcfs.goTo([1.0, 0, 0], 0, 2.0)    # forward
+    timeHelper.sleep(5.0)
+    allcfs.goTo([1.0, 0, 0], 0, 2.0)    # forward
+    timeHelper.sleep(5.0)
+    allcfs.goTo([1.0, 0, 0], 0, 2.0)    # forward
+    timeHelper.sleep(5.0)
+    allcfs.goTo([1.0, 0, 0], 0, 2.0)    # forward
+    timeHelper.sleep(5.0)
+    allcfs.goTo([1.0, 0, 0], 0, 2.0)    # forward
+    timeHelper.sleep(5.0)
+    allcfs.goTo([1.0, 0, 0], 0, 2.0)    # forward
+    timeHelper.sleep(5.0)
+    allcfs.goTo([1.0, 0, 0], 0, 2.0)    # forward
+    timeHelper.sleep(5.0)
 
     # UNCOMMENT THE MOVE THAT YOU WANT TO DO FROM FOLLOWING LIST
     #fblrMovementDemo(swarm, timeHelper)
     #wallScam(swarm, timeHelper)
     #bambooForestScam(swarm, timeHelper)
-    hoopScam(swarm, timeHelper)
+    #hoopScam(swarm, timeHelper)
     # circleArrangement()
 
     input("\nPress any key to land...")
