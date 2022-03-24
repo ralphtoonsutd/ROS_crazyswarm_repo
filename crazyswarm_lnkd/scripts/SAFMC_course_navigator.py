@@ -33,7 +33,6 @@
 
 
 # Python
-from cv2 import line
 import numpy as np
 import rospkg
 import csv
@@ -117,31 +116,6 @@ def circleArrangement(swarm: Crazyswarm, timeHelper, frontCoord, avoidance=True)
         timeHelper.sleep(2.5)
 
 
-# Line arrangement shouldn't be needed (See 3C)
-# def lineArrangement(swarm: Crazyswarm, timeHelper, startCoord):
-#     # Takes co-ord for start of the line and arranges drones into line formation
-#     # May need to be updated to handle longer lines/teams better
-
-#     # 1. Split drones into 5 different movement planes
-#     for num, cf in enumerate(swarm.allcfs.crazyflies):
-#         height = calcFlightLevelValue(num, 5)
-#         cf.goTo([0, 0, height], 0, 2.5, relative=True)
-#     timeHelper.sleep(2.5)
-
-#     # 2. Create drone co-ord from its formation number and the formation's front and move
-#     for num, cf in enumerate(swarm.allcfs.crazyflies):
-#         formationPos = np.add(np.array(startCoord),
-#                               np.array([num*-0.25, 0, 0]))
-#         cf.goTo(formationPos, 0, 2.5, relative=False)
-#     timeHelper.sleep(2.5)
-
-#     # 3. Return to normal height
-#     for num, cf in enumerate(swarm.allcfs.crazyflies):
-#         height = calcFlightLevelValue(num, 5)
-#         cf.goTo([0, 0, -height], 0, 2.5, relative=True)
-#     timeHelper.sleep(2.5)
-
-
 def calcFlightLevelValue(droneNum, numLevels):
     # Returns absolute height for drone flight level
     # This might break for number of flight levels different from 5 idfk
@@ -198,6 +172,8 @@ if __name__ == "__main__":
                 if row['ID'] != 1:
                     relativeMove = np.subtract(currentCoord, previousCoord)
                     swarm.allcfs.goTo(relativeMove, 0, 2.5, relative=True)
+                    timeHelper.sleep(2.5)
+
                 else:
                     circleArrangement(swarm, timeHelper, currentCoord, False)
 
