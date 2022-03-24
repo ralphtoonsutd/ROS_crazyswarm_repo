@@ -16,16 +16,18 @@
 # 3. Iterate through the co-ordinate dictionary moving the swarm as follows:
 #   3A. If the next dictionary value is in a different formation, first perform the formation change and THEN execute
 #       either 3B or 3C.
-#   3B. If the drones are in the circle formation, perform a swarm relative move equal to the next global coord minus
-#       the current global coord (in the circle state the drones can always move together)
+#   3B. If the drones are in the circle formation, perform a swarm relative move equal to the current global coord minus
+#       the previous global coord (in the circle state the drones can always move together). For the first move, "rebuild"
+#       the formation at the first global coord.
 #   3C. If the drones are in the line formation, create a fresh coord array with length equal to num CFs to store their
-#       positions. Initial value here should be the current value in the .csv dictionary (for lead drone), with following
-#       values being equal to (CURRENT_X, CURRENT_Y - (DRONE_SPACING*ARRAY_POSITION), CURRENT_Z). Iterate over this array,
-#       performing global moves on a drone by drone basis. For the following moves add the next coord from the trajectory
-#       dictionary to the top of the array, remove the final value from the array, and write the values to the drones in order.
+#       positions. Initial values here should be the current values in the circle formation (absolute position), with
+#       coords[0] = new position and coords[n] removed. Iterate over this array, performing global moves on a drone by
+#       drone basis. For the following moves add the next coord from the trajectory dictionary to the top of the array,
+#       remove the final value from the array, and write the values to the drones in order. The initial moves will cause
+#       the circle formation to "unwrap" into the line formation.
 # 4. When the end of the dictionary is reached, the drones should be in the circle formation above the landing zone. Perform
 #    a final swarm adjustment to ensure a clean circle, then call the swarm to land.
-# 5. Win and lift the trophy reminding your rivals it was EZPZ and they're trash tier.
+# 5. Win and lift the trophy reminding your rivals it was EZPZ.
 
 ##################################################################################################################################
 
@@ -47,6 +49,10 @@ from crazyswarm_lnkd.srv import *
 
 # Crazyswarm
 from crazyswarm.msg import GenericLogData
+
+
+# GLOBAL CONSTANTS
+FORMATION_RADIUS = 1.25  # m
 
 
 def initSwarm():
@@ -85,69 +91,54 @@ def resetEstimator(swarm: Crazyswarm, timeHelper):
     timeHelper.sleep(1.0)
 
 
-def circleArrangement(swarm: Crazyswarm, timeHelper, centreCoord):
-    # NEEDS TO BE UPDATED TO WORK FOR LEAD DRONE
-    # Takes centre co-ordinates and arranges drones into circle formation
+def circleArrangement(swarm: Crazyswarm, timeHelper, frontCoord, avoidance=True):
+    # Takes front co-ordinates and arranges drones into circle formation
+    # Assumes initial positions consider (0,0) to be front drone
 
-    # 1. Split drones into 5 different movement planes
-    for num, cf in enumerate(swarm.allcfs.crazyflies):
-        height = calcFlightLevelValue(num, 5)
-        cf.goTo([0, 0, height], 0, 2.5, relative=True)
+    if avoidance:
+        # 1. Split drones into 5 different movement planes
+        for num, cf in enumerate(swarm.allcfs.crazyflies):
+            height = calcFlightLevelValue(num, 5)
+            cf.goTo([0, 0, height], 0, 2.5, relative=True)
+        timeHelper.sleep(2.5)
 
-    timeHelper.sleep(2.5)
-
-    for num, cf in enumerate(swarm.allcfs.crazyflies):
-        # 2. Create drone co-ord from its formation position and the formation's centre
-        formationPos = [0.0, 0.0, 0.0]
-        for count, initialPos in enumerate(cf.initialPosition):
-            formationPos[count] = centreCoord[count] + initialPos[count]
-
-        # 3. Move to position
+    # 2. Create drone co-ord from its formation position and the formation's front and move
+    for cf in swarm.allcfs.crazyflies:
+        formationPos = np.add(cf.initialPosition, np.array(frontCoord))
         cf.goTo(formationPos, 0, 2.5, relative=False)
-
     timeHelper.sleep(2.5)
 
-    # 4. Return to normal height
-    for num, cf in enumerate(swarm.allcfs.crazyflies):
-        height = calcFlightLevelValue(num, 5)
-        cf.goTo([0, 0, -height], 0, 2.5, relative=True)
-
-    timeHelper.sleep(2.5)
-
-    # Following code is here as an example only, do NOT uncomment
-    # Wherever the CFs take off from, move them into their correct default positions
-    """
-    for cf in allcfs.crazyflies:
-        pos = np.array(cf.initialPosition) + np.array([0, 0, 0.5])
-        cf.goTo(pos, 0, 2.0)
-    timeHelper.sleep(2.5)
-    """
+    if avoidance:
+        # 3. Return to normal height
+        for num, cf in enumerate(swarm.allcfs.crazyflies):
+            height = calcFlightLevelValue(num, 5)
+            cf.goTo([0, 0, -height], 0, 2.5, relative=True)
+        timeHelper.sleep(2.5)
 
 
-def lineArrangement(swarm: Crazyswarm, timeHelper, startCoord):
-    # Takes co-ord for start of the line and arranges drones into line formation
+# Line arrangement shouldn't be needed (See 3C)
+# def lineArrangement(swarm: Crazyswarm, timeHelper, startCoord):
+#     # Takes co-ord for start of the line and arranges drones into line formation
+#     # May need to be updated to handle longer lines/teams better
 
-    # 1. Split drones into 5 different movement planes
-    for num, cf in enumerate(swarm.allcfs.crazyflies):
-        height = calcFlightLevelValue(num, 5)
-        cf.goTo([0, 0, height], 0, 2.5, relative=True)
+#     # 1. Split drones into 5 different movement planes
+#     for num, cf in enumerate(swarm.allcfs.crazyflies):
+#         height = calcFlightLevelValue(num, 5)
+#         cf.goTo([0, 0, height], 0, 2.5, relative=True)
+#     timeHelper.sleep(2.5)
 
-    timeHelper.sleep(2.5)
+#     # 2. Create drone co-ord from its formation number and the formation's front and move
+#     for num, cf in enumerate(swarm.allcfs.crazyflies):
+#         formationPos = np.add(np.array(startCoord),
+#                               np.array([num*-0.25, 0, 0]))
+#         cf.goTo(formationPos, 0, 2.5, relative=False)
+#     timeHelper.sleep(2.5)
 
-    for num, cf in enumerate(swarm.allcfs.crazyflies):
-        # 2. Create drone co-ord from its formation position and the formation's centre
-        formationPos = startCoord + [num*-0.25, 0, 0]
-        # 3. Move to position
-        cf.goTo(formationPos, 0, 2.5, relative=False)
-
-    timeHelper.sleep(2.5)
-
-    # 4. Return to normal height
-    for num, cf in enumerate(swarm.allcfs.crazyflies):
-        height = calcFlightLevelValue(num, 5)
-        cf.goTo([0, 0, -height], 0, 2.5, relative=True)
-
-    timeHelper.sleep(2.5)
+#     # 3. Return to normal height
+#     for num, cf in enumerate(swarm.allcfs.crazyflies):
+#         height = calcFlightLevelValue(num, 5)
+#         cf.goTo([0, 0, -height], 0, 2.5, relative=True)
+#     timeHelper.sleep(2.5)
 
 
 def calcFlightLevelValue(droneNum, numLevels):
@@ -175,7 +166,8 @@ if __name__ == "__main__":
     # Multi-ranger code has been removed for now, potential to re-add in future
     # MR_checker = rospy.ServiceProxy("MR_checker", MRProximityAlert, persistent=True)
 
-    currentFormation = 0    # 0 = circle, 1 = line
+    previousCoord = [0, 0, 0]   # For circle moves
+    currentFormation = 0        # 0 = circle, 1 = line
     lineCoords = [[0, 0, 0]]*len(swarm.allcfs.crazyflies)
 
     # Main program loop
@@ -196,7 +188,15 @@ if __name__ == "__main__":
 
             # 3B - Circle
             if currentFormation == 0:
-                pass
+                if row['ID'] != 1:
+                    relativeMove = np.subtract()
+                    swarm.allcfs.goTo(relativeMove, 0, 2.5, relative=True)
+
+                else:
+                    circleArrangement(swarm, timeHelper, [
+                                      row['x'], row['y'], row['z']], False)
+
+                previousCoord = [row['x'], row['y'], row['z']]
 
             # 3C - Line
             elif currentFormation == 1:
