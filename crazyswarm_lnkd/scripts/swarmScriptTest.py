@@ -18,8 +18,8 @@ def initSwarm():
     timeHelper = swarm.timeHelper
 
     # Set params for UWB positioning mode (TDoA3) and robust estimation method
-    swarm.allcfs.setParam("loco/mode", 3)
-    swarm.allcfs.setParam("kalman/robustTdoa", 1)
+    #swarm.allcfs.setParam("loco/mode", 3)
+    #swarm.allcfs.setParam("kalman/robustTdoa", 1)
 
     return swarm, timeHelper
 
@@ -176,35 +176,35 @@ def calcMovePlaneValue(droneNum, numPlanes):
 if __name__ == "__main__":
     swarm, timeHelper = initSwarm()
 
-    swarm.allcfs.setParam("kalman/resetEstimation", 1)
-    timeHelper.sleep(0.1)
-    swarm.allcfs.setParam("kalman/resetEstimation", 0)
-    timeHelper.sleep(1.0)
+    #swarm.allcfs.setParam("kalman/resetEstimation", 1)
+    # timeHelper.sleep(0.1)
+    #swarm.allcfs.setParam("kalman/resetEstimation", 0)
+    # timeHelper.sleep(1.0)
 
     swarm.allcfs.takeoff(targetHeight=0.5, duration=2)
     timeHelper.sleep(5.0)
-    
+
     allcfs = swarm.allcfs
 
-    allcfs.goTo([1.0, 0, 0], 0, 2.0)    # forward
-    timeHelper.sleep(5.0)
-    allcfs.goTo([1.0, 0, 0], 0, 2.0)    # forward
-    timeHelper.sleep(5.0)
-    allcfs.goTo([1.0, 0, 0], 0, 2.0)    # forward
-    timeHelper.sleep(5.0)
-    allcfs.goTo([1.0, 0, 0], 0, 2.0)    # forward
-    timeHelper.sleep(5.0)
-    allcfs.goTo([1.0, 0, 0], 0, 2.0)    # forward
-    timeHelper.sleep(5.0)
-    allcfs.goTo([1.0, 0, 0], 0, 2.0)    # forward
-    timeHelper.sleep(5.0)
-    allcfs.goTo([1.0, 0, 0], 0, 2.0)    # forward
-    timeHelper.sleep(5.0)
-    allcfs.goTo([1.0, 0, 0], 0, 2.0)    # forward
-    timeHelper.sleep(5.0)
+    # allcfs.goTo([1.0, 0, 0], 0, 2.0)    # forward
+    # timeHelper.sleep(5.0)
+    # allcfs.goTo([1.0, 0, 0], 0, 2.0)    # forward
+    # timeHelper.sleep(5.0)
+    # allcfs.goTo([1.0, 0, 0], 0, 2.0)    # forward
+    # timeHelper.sleep(5.0)
+    # allcfs.goTo([1.0, 0, 0], 0, 2.0)    # forward
+    # timeHelper.sleep(5.0)
+    # allcfs.goTo([1.0, 0, 0], 0, 2.0)    # forward
+    # timeHelper.sleep(5.0)
+    # allcfs.goTo([1.0, 0, 0], 0, 2.0)    # forward
+    # timeHelper.sleep(5.0)
+    # allcfs.goTo([1.0, 0, 0], 0, 2.0)    # forward
+    # timeHelper.sleep(5.0)
+    # allcfs.goTo([1.0, 0, 0], 0, 2.0)    # forward
+    # timeHelper.sleep(5.0)
 
     # UNCOMMENT THE MOVE THAT YOU WANT TO DO FROM FOLLOWING LIST
-    #fblrMovementDemo(swarm, timeHelper)
+    fblrMovementDemo(swarm, timeHelper)
     #wallScam(swarm, timeHelper)
     #bambooForestScam(swarm, timeHelper)
     #hoopScam(swarm, timeHelper)
